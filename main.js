@@ -1,14 +1,14 @@
-// Hlavní aplikační logika - MyConnectAI v3
-// Verze: 3.0
+// Hlavní aplikační logika - MyConnectAI v3.1
+// Verze: 3.1 - S optimalizovanou inicializací
 
-const APP_VERSION = "3.0";
+const APP_VERSION = "3.1";
 
 // Globální proměnné
 let messages = [];
 let rateLimitCounter = 0;
 let rateLimitTimer = null;
 
-// Odeslání zprávy
+// Odeslání zprávy s vylepšeným error handling
 async function sendMessage() {
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
@@ -85,19 +85,43 @@ async function sendMessage() {
         
     } catch (error) {
         console.error('❌ Error:', error);
+        
         let errorMessage = CONFIG.MESSAGES.ERROR;
         
-        // Specifické chybové hlášky
-        if (error.message.includes('Neplatný API klíč')) {
-            errorMessage = 'Neplatný API klíč. Zkontrolujte nastavení.';
-        } else if (error.message.includes('Překročen limit')) {
-            errorMessage = 'Překročen limit požadavků. Zkuste to později.';
-        } else if (error.message.includes('Failed to fetch')) {
-            errorMessage = CONFIG.MESSAGES.CONNECTION_ERROR;
-        } else if (error.message.includes('not configured')) {
-            errorMessage = CONFIG.MESSAGES.NO_API_KEY;
-        } else if (error.message) {
-            errorMessage = error.message;
+        // Specifické chybové hlášky podle typu chyby
+        if (error instanceof window.APIError) {
+            switch (error.details.statusCode) {
+                case 401:
+                    errorMessage = 'Neplatný API klíč. Zkontrolujte nastavení.';
+                    break;
+                case 429:
+                    errorMessage = 'Překročen limit požadavků. Zkuste to za chvíli.';
+                    break;
+                case 503:
+                    errorMessage = 'Služba je dočasně nedostupná. Zkuste to později.';
+                    break;
+                default:
+                    errorMessage = error.message;
+            }
+        } else if (error instanceof window.ConfigurationError) {
+            if (error.code === 'NO_API_KEY') {
+                errorMessage = CONFIG.MESSAGES.NO_API_KEY;
+            } else {
+                errorMessage = `Chyba konfigurace: ${error.message}`;
+            }
+        } else if (error instanceof window.ModelError) {
+            switch (error.code) {
+                case 'TIMEOUT':
+                    errorMessage = 'Požadavek vypršel - AI server neodpovídá.';
+                    break;
+                case 'NETWORK_ERROR':
+                    errorMessage = CONFIG.MESSAGES.CONNECTION_ERROR;
+                    break;
+                default:
+                    errorMessage = error.message;
+            }
+        } else {
+            errorMessage = error.message || CONFIG.MESSAGES.ERROR;
         }
         
         if (window.uiManager) {
@@ -137,26 +161,41 @@ function clearChat() {
     }
 }
 
-// Inicializace aplikace
+// Inicializace aplikace s lepší kontrolou závislostí
 async function initApp() {
-    console.log('🚀 Starting MyConnectAI v3...');
+    console.log('🚀 Starting MyConnectAI v3.1...');
     console.log('📌 App Version:', APP_VERSION);
     console.log('📌 Config Version:', CONFIG.VERSION);
     
     try {
-        // 1. Inicializovat Model Loader
+        // 1. Počkat na Security Manager
+        if (window.security && !window.security.initialized) {
+            console.log('⏳ Waiting for Security Manager...');
+            await window.security.waitForInit();
+        }
+        
+        // 2. Inicializovat Model Loader
         if (window.modelLoader) {
+            console.log('⏳ Initializing Model Loader...');
             await window.modelLoader.initialize();
         }
         
-        // 2. Inicializovat Model Manager
+        // 3. Inicializovat Model Manager
         if (window.modelManager) {
+            console.log('⏳ Initializing Model Manager...');
             await window.modelManager.initialize();
             
             // Validovat konfiguraci
             const issues = window.modelManager.validateConfiguration();
             if (issues.length > 0) {
-                console.warn('⚠️ Configuration issues:', issues);
+                console.warn('⚠️ Configuration issues:');
+                issues.forEach(issue => {
+                    if (typeof issue === 'string') {
+                        console.warn(`  - ${issue}`);
+                    } else {
+                        console.warn(`  - [${issue.type}] ${issue.message}`);
+                    }
+                });
             }
             
             // Zobrazit dostupné modely
@@ -175,59 +214,123 @@ async function initApp() {
             }
         }
         
-        // 3. Debug mode
+        // 4. Debug mode
         if (CONFIG.DEBUG_MODE) {
             console.log('🐛 Debug mode is ON');
+            window.debugInfo = {
+                app: window.chatSystem,
+                security: window.security,
+                modelManager: window.modelManager,
+                uiManager: window.uiManager,
+                settingsManager: window.settingsManager
+            };
         }
         
-        console.log('✅ MyConnectAI v3 ready');
+        console.log('✅ MyConnectAI v3.1 ready');
         
     } catch (error) {
         console.error('❌ Initialization failed:', error);
+        
+        // Zobrazit user-friendly chybu
         if (window.uiManager) {
             window.uiManager.addMessage('error', 
                 'Chyba při inicializaci aplikace. Zkuste obnovit stránku.'
             );
+        } else {
+            // Fallback alert pokud UI není dostupné
+            alert('Kritická chyba při načítání aplikace. Prosím obnovte stránku.');
         }
     }
 }
 
+// Promise-based čekání na komponenty
+function waitForComponents() {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 10 sekund max
+        
+        const checkInterval = setInterval(() => {
+            attempts++;
+            
+            const requiredComponents = {
+                'CONFIG': window.CONFIG,
+                'Security': window.security,
+                'Models Registry': window.MODELS_REGISTRY,
+                'OpenAI Model': window.OpenAIModel,
+                'Model Manager': window.modelManager,
+                'Model Loader': window.modelLoader,
+                'UI Manager': window.uiManager,
+                'Settings Manager': window.settingsManager
+            };
+            
+            const missingComponents = Object.entries(requiredComponents)
+                .filter(([name, component]) => !component)
+                .map(([name]) => name);
+            
+            if (missingComponents.length === 0) {
+                clearInterval(checkInterval);
+                console.log('✅ All components loaded');
+                resolve();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                console.error('❌ Failed to load components:', missingComponents);
+                reject(new Error(`Missing components: ${missingComponents.join(', ')}`));
+            } else if (attempts % 10 === 0) {
+                console.log(`⏳ Waiting for: ${missingComponents.join(', ')} (${attempts}/${maxAttempts})`);
+            }
+        }, 200);
+    });
+}
+
 // Spuštění aplikace
-window.addEventListener('load', function() {
+window.addEventListener('load', async function() {
     console.log('🌟 Window loaded, starting initialization...');
     
-    // Počkat na načtení všech závislostí
-    let attempts = 0;
-    const maxAttempts = 20;
+    try {
+        // Počkat na načtení všech komponent
+        await waitForComponents();
+        
+        // Malé zpoždění pro jistotu
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Spustit inicializaci
+        await initApp();
+        
+    } catch (error) {
+        console.error('❌ Failed to start application:', error);
+        alert(`Chyba při načítání aplikace: ${error.message}\n\nProsím obnovte stránku.`);
+    }
+});
+
+// Globální error handler
+window.addEventListener('error', (event) => {
+    console.error('Global error:', event.error);
     
-    const checkDependencies = () => {
-        attempts++;
-        
-        const requiredDeps = [
-            window.security,
-            window.modelLoader,
-            window.modelManager,
-            window.uiManager,
-            window.settingsManager
-        ];
-        
-        const allLoaded = requiredDeps.every(dep => dep !== undefined);
-        
-        if (allLoaded) {
-            console.log('✅ All dependencies loaded');
-            setTimeout(initApp, 100);
-        } else {
-            if (attempts < maxAttempts) {
-                console.log(`⏳ Waiting for dependencies... (${attempts}/${maxAttempts})`);
-                setTimeout(checkDependencies, 200);
-            } else {
-                console.error('❌ Failed to load dependencies');
-                alert('Chyba při načítání aplikace. Některé komponenty se nepodařilo načíst.');
-            }
-        }
-    };
+    // Nezobrazovat chyby z external skriptů
+    if (event.filename && !event.filename.includes(window.location.host)) {
+        return;
+    }
     
-    checkDependencies();
+    // Log do konzole pro debugging
+    if (CONFIG.DEBUG_MODE) {
+        console.error('Error details:', {
+            message: event.message,
+            filename: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            error: event.error
+        });
+    }
+});
+
+// Unhandled promise rejection handler
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    
+    // V debug modu zobrazit více informací
+    if (CONFIG.DEBUG_MODE) {
+        console.error('Promise rejection details:', event);
+    }
 });
 
 // Export pro globální přístup
@@ -235,10 +338,16 @@ window.chatSystem = {
     messages: messages,
     sendMessage: sendMessage,
     clearChat: clearChat,
-    version: APP_VERSION
+    version: APP_VERSION,
+    // Debug funkce
+    getState: () => ({
+        messages: messages.length,
+        rateLimitCounter: rateLimitCounter,
+        initialized: window.modelManager?.initialized
+    })
 };
 
 // Zachování kompatibility
 window.sendMessage = sendMessage;
 
-console.log('📦 Main.js loaded (MyConnectAI v3)');
+console.log('📦 Main.js loaded (MyConnectAI v3.1)');
