@@ -192,8 +192,40 @@
     
     <!-- 7. Finální inicializace -->
     <script>
-        // Ověřit načtení všech komponent
+        // Nastavit texty z konfigurace při načtení
         document.addEventListener('DOMContentLoaded', function() {
+            // Nastavit texty z CONFIG
+            if (window.CONFIG) {
+                // Titulek stránky
+                document.title = CONFIG.UI.PAGE_TITLE;
+                
+                // Hlavička
+                const titleElement = document.querySelector('.header-logo-link');
+                const subtitleElement = document.querySelector('.header-subtitle');
+                if (titleElement) titleElement.textContent = CONFIG.UI.APP_TITLE;
+                if (subtitleElement) subtitleElement.textContent = CONFIG.UI.APP_SUBTITLE;
+                
+                // Reload button
+                const reloadButton = document.querySelector('.action-button[onclick*="showWelcomeScreen"]');
+                if (reloadButton) {
+                    reloadButton.textContent = CONFIG.UI.RELOAD_BUTTON_TEXT;
+                    reloadButton.title = CONFIG.UI.RELOAD_BUTTON_TOOLTIP;
+                }
+                
+                // Input placeholder
+                const chatInput = document.getElementById('chat-input');
+                if (chatInput) {
+                    chatInput.placeholder = CONFIG.UI.INPUT_PLACEHOLDER;
+                }
+                
+                // Send button
+                const sendButton = document.getElementById('send-button');
+                if (sendButton) {
+                    sendButton.textContent = CONFIG.UI.SEND_BUTTON_TEXT;
+                }
+            }
+            
+            // Ověřit načtení všech komponent
             const components = {
                 'CONFIG': window.CONFIG,
                 'Security': window.security,
