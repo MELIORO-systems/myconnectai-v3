@@ -1,9 +1,9 @@
-// Konfigurace aplikace - MyConnectAI v2
-// Verze: 2.1 - Models Registry s lokálním ukládáním
+// Konfigurace aplikace - MyConnectAI v3
+// Verze: 3.0 - Models Registry s lokálním ukládáním
 
 const CONFIG = {
     // === ZÁKLADNÍ NASTAVENÍ ===
-    VERSION: "2.1",
+    VERSION: "3.0",
     LAST_UPDATE: new Date().toISOString(),
     
     // === DEBUG MODE ===
@@ -27,8 +27,8 @@ const CONFIG = {
     
     // === UI NASTAVENÍ ===
     UI: {
-        PAGE_TITLE: "MyConnectAI v2 - Multi-Model Chat",
-        APP_TITLE: "MyConnectAI v2",
+        PAGE_TITLE: "MyConnectAI v3 - Multi-Model Chat",
+        APP_TITLE: "MyConnectAI v3",
         APP_SUBTITLE: "Multi-Model AI Assistant",
         
         // Tlačítka a vstupy
@@ -84,7 +84,7 @@ const CONFIG = {
     MESSAGES: {
         LOADING: "Přemýšlím...",
         ERROR: "Omlouvám se, došlo k chybě. Zkuste to prosím znovu.",
-        WELCOME: "Vítejte! Jak vám mohu pomoci?",
+        WELCOME: "Vítejte v MyConnectAI v3",
         CONNECTION_ERROR: "Chyba připojení. Zkontrolujte internetové připojení.",
         MODEL_CHANGED: "Model byl úspěšně změněn.",
         NO_API_KEY: "Pro tento model není nastaven API klíč. Prosím nastavte ho v nastavení.",
@@ -106,13 +106,13 @@ const CONFIG = {
     
     // === SYSTEM INFO ===
     SYSTEM: {
-        NAME: "MyConnectAI v2",
+        NAME: "MyConnectAI v3",
         DESCRIPTION: "Multi-Model AI Chat aplikace s podporou různých jazykových modelů",
-        VERSION: "2.1.0",
+        VERSION: "3.0.0",
         BUILD_DATE: "2024-12-06",
         AUTHOR: "MELIORO Systems",
         LICENSE: "Proprietary",
-        REPOSITORY: "https://github.com/melioro-systems/myconnectai-v2",
+        REPOSITORY: "https://github.com/melioro-systems/myconnectai-v3",
         DOCUMENTATION: "https://docs.melioro.cz/myconnectai",
         SUPPORT_EMAIL: "support@melioro.cz"
     },
@@ -155,7 +155,8 @@ const CONFIG = {
             MAX_TOKENS: 2048,
             TOP_P: 1,
             FREQUENCY_PENALTY: 0,
-            PRESENCE_PENALTY: 0
+            PRESENCE_PENALTY: 0,
+            SYSTEM_PROMPT: "Jsi přátelský a nápomocný AI asistent. Odpovídáš v češtině, pokud není požadováno jinak."
         }
     },
     
