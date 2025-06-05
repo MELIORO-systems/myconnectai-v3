@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyConnectAI v2 - Multi-Model Chat</title>
+    <title>MyConnectAI v3 - Multi-Model Chat</title>
     
     <!-- Styly -->
     <link rel="stylesheet" href="style.css">
@@ -16,7 +16,7 @@
         <!-- HLAVIČKA -->
         <div class="chat-header">
             <div class="header-content">
-                <h1><a href="#" onclick="location.reload(); return false;" class="header-logo-link">MyConnectAI v2</a></h1>
+                <h1><a href="#" onclick="location.reload(); return false;" class="header-logo-link">MyConnectAI v3</a></h1>
                 <div class="header-subtitle">Multi-Model AI Assistant</div>
             </div>
             <div class="header-buttons">
@@ -41,7 +41,7 @@
         <div id="chat-messages" class="chat-messages">
             <div class="welcome-container">
                 <div class="welcome-content">
-                    <h2 class="welcome-title">Vítejte v MyConnectAI v2</h2>
+                    <h2 class="welcome-title">Vítejte v MyConnectAI v3</h2>
                     <p class="welcome-subtitle">Vyberte si AI model a začněte konverzaci</p>
                 </div>
                 <div class="example-queries" id="example-queries">
@@ -165,7 +165,7 @@
 
     <!-- SKRIPTY -->
     
-    <!-- 1. Konfigurace -->
+    <!-- 1. Konfigurace - MUSÍ BÝT PRVNÍ -->
     <script src="config.js"></script>
     
     <!-- 2. Bezpečnost -->
@@ -174,25 +174,45 @@
     <!-- 3. Models Registry -->
     <script src="models-registry.js"></script>
     
-    <!-- 4. Managers -->
-    <script src="model-manager.js"></script>
-    <script src="model-loader.js"></script>
-    <script src="ui-manager.js"></script>
-    <script src="settings-manager.js"></script>
-    
-    <!-- 5. Model implementace -->
+    <!-- 4. Model implementace -->
     <script src="model-openai.js"></script>
     <!-- Budoucí modely:
     <script src="model-claude.js"></script>
     <script src="model-gemini.js"></script>
     -->
     
+    <!-- 5. Managers -->
+    <script src="model-manager.js"></script>
+    <script src="model-loader.js"></script>
+    <script src="ui-manager.js"></script>
+    <script src="settings-manager.js"></script>
+    
     <!-- 6. Hlavní aplikace -->
     <script src="main.js"></script>
     
-    <!-- 7. Inicializace -->
+    <!-- 7. Finální inicializace -->
     <script>
-        console.log('🚀 MyConnectAI v2 with Settings loaded');
+        // Ověřit načtení všech komponent
+        document.addEventListener('DOMContentLoaded', function() {
+            const components = {
+                'CONFIG': window.CONFIG,
+                'Security': window.security,
+                'Models Registry': window.MODELS_REGISTRY,
+                'OpenAI Model': window.OpenAIModel,
+                'Model Manager': window.modelManager,
+                'Model Loader': window.modelLoader,
+                'UI Manager': window.uiManager,
+                'Settings Manager': window.settingsManager,
+                'Main': window.chatSystem
+            };
+            
+            console.log('🔍 Component check:');
+            Object.entries(components).forEach(([name, component]) => {
+                console.log(`  ${name}: ${component ? '✅' : '❌'}`);
+            });
+            
+            console.log('🚀 MyConnectAI v3 loaded');
+        });
     </script>
 </body>
 </html>
