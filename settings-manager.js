@@ -1,5 +1,5 @@
 // Settings Manager - Správa nastavení aplikace
-// Verze: 1.0 - Jednodušší verze pro MyConnectAI v3
+// Verze: 1.1 - Vylepšená verze s async operacemi a lepší validací
 
 class SettingsManager {
     constructor() {
@@ -7,6 +7,7 @@ class SettingsManager {
         this.hasUnsavedChanges = false;
         this.selectedTheme = null;
         this.selectedModel = null;
+        this.eventListeners = new Map();
     }
 
     // Otevřít nastavení
@@ -40,6 +41,9 @@ class SettingsManager {
             }
         }
 
+        // Cleanup před zavřením
+        this.cleanup();
+
         const modal = document.getElementById('settings-modal');
         if (modal) {
             modal.style.display = 'none';
@@ -53,15 +57,15 @@ class SettingsManager {
     }
 
     // Načíst aktuální nastavení
-    loadCurrentSettings() {
+    async loadCurrentSettings() {
         // Model selector
-        this.loadModelSelector();
+        await this.loadModelSelector();
         
         // Theme selector
         this.loadThemeSelector();
         
         // API klíče
-        this.loadApiKeys();
+        await this.loadApiKeys();
         
         // Specifická nastavení modelů
         this.loadModelSpecificSettings();
@@ -71,17 +75,25 @@ class SettingsManager {
         this.updateSaveButton();
     }
 
-    // Načíst model selector
-    loadModelSelector() {
+    // Načíst model selector - async verze
+    async loadModelSelector() {
         const select = document.getElementById('model-select');
         if (!select || !window.modelManager) return;
 
         // Vyčistit existující options
-        select.innerHTML = '';
+        select.innerHTML = '<option value="">Načítání modelů...</option>';
+
+        // Počkat na inicializaci model manageru
+        if (!window.modelManager.initialized) {
+            await window.modelManager.initialize();
+        }
 
         // Získat dostupné modely
         const models = window.modelManager.getAvailableModels();
         const activeModel = window.modelManager.getActiveModel();
+
+        // Vyčistit loading option
+        select.innerHTML = '';
 
         // Přidat modely do selectu
         models.forEach(model => {
@@ -99,11 +111,11 @@ class SettingsManager {
         });
 
         // Event listener
-        select.onchange = () => {
+        this.addEventListener(select, 'change', () => {
             this.selectedModel = select.value;
             this.markAsChanged();
             this.updateModelSpecificSettings();
-        };
+        });
     }
 
     // Načíst theme selector
@@ -121,34 +133,39 @@ class SettingsManager {
             }
 
             // Event listener
-            btn.onclick = () => {
+            this.addEventListener(btn, 'click', () => {
                 document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.selectedTheme = theme;
                 this.markAsChanged();
-            };
+            });
         });
     }
 
-    // Načíst API klíče
-    loadApiKeys() {
+    // Načíst API klíče - async verze
+    async loadApiKeys() {
         // OpenAI
-        this.loadApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
+        await this.loadApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
         
         // Anthropic
-        this.loadApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+        await this.loadApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
         
         // Google
-        this.loadApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        await this.loadApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
     }
 
-    // Načíst jednotlivý API klíč
-    loadApiKey(provider, storageKey) {
+    // Načíst jednotlivý API klíč - async verze
+    async loadApiKey(provider, storageKey) {
         const input = document.getElementById(`${provider}-api-key`);
         if (!input) return;
 
+        // Počkat na security manager
+        if (window.security && !window.security.initialized) {
+            await window.security.waitForInit();
+        }
+
         // Pokud existuje uložený klíč, zobrazit placeholder
-        const savedKey = security.loadSecure(storageKey);
+        const savedKey = await security.loadSecure(storageKey);
         if (savedKey) {
             input.value = '';
             input.placeholder = '••••••••••••••• (uloženo)';
@@ -157,8 +174,12 @@ class SettingsManager {
             input.placeholder = this.getApiKeyPlaceholder(provider);
         }
 
-        // Event listener
-        input.onchange = () => this.markAsChanged();
+        // Event listener s debounce
+        let timeout;
+        this.addEventListener(input, 'input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => this.markAsChanged(), 300);
+        });
     }
 
     // Získat placeholder pro API klíč
@@ -178,7 +199,7 @@ class SettingsManager {
         if (assistantIdInput) {
             const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID);
             assistantIdInput.value = savedId || '';
-            assistantIdInput.onchange = () => this.markAsChanged();
+            this.addEventListener(assistantIdInput, 'change', () => this.markAsChanged());
         }
 
         // Zobrazit/skrýt podle vybraného modelu
@@ -267,12 +288,22 @@ class SettingsManager {
         await this.saveApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
     }
 
-    // Uložit jednotlivý API klíč
+    // Uložit jednotlivý API klíč - vylepšená verze
     async saveApiKey(provider, storageKey) {
         const input = document.getElementById(`${provider}-api-key`);
-        if (!input || !input.value.trim()) return;
+        if (!input) return;
 
         const apiKey = input.value.trim();
+        
+        // Pokud je prázdný a už máme uložený, nechat ho
+        if (!apiKey) {
+            const existing = await security.loadSecure(storageKey);
+            if (existing) {
+                console.log(`✅ Keeping existing ${provider} API key`);
+                return;
+            }
+            return;
+        }
         
         // Validace formátu
         if (!this.validateApiKey(provider, apiKey)) {
@@ -280,22 +311,33 @@ class SettingsManager {
         }
 
         // Uložit
-        security.saveSecure(storageKey, apiKey);
+        await security.saveSecure(storageKey, apiKey);
         console.log(`✅ ${provider} API key saved`);
     }
 
-    // Validace API klíče
+    // Validace API klíče - méně striktní verze
     validateApiKey(provider, apiKey) {
-        const patterns = CONFIG.VALIDATION.API_KEY_PATTERNS;
+        // Základní validace délky
+        if (apiKey.length < 20) {
+            return false;
+        }
         
+        // Provider-specific validace
         switch (provider) {
             case 'openai':
-                return patterns.OPENAI.test(apiKey);
+                // OpenAI klíče začínají sk- nebo jsou session klíče
+                return apiKey.startsWith('sk-') || apiKey.startsWith('sess-');
+                
             case 'anthropic':
-                return patterns.ANTHROPIC.test(apiKey);
+                // Anthropic klíče začínají sk-ant-
+                return apiKey.startsWith('sk-ant-');
+                
             case 'google':
-                return patterns.GOOGLE.test(apiKey);
+                // Google klíče začínají AIza
+                return apiKey.startsWith('AIza');
+                
             default:
+                // Pro neznámé providery akceptovat jakýkoliv klíč
                 return true;
         }
     }
@@ -326,7 +368,7 @@ class SettingsManager {
                 'google': CONFIG.STORAGE.KEYS.GOOGLE_KEY
             }[provider];
             
-            apiKey = security.loadSecure(storageKey);
+            apiKey = await security.loadSecure(storageKey);
         }
 
         if (!apiKey) {
@@ -368,9 +410,16 @@ class SettingsManager {
             const password = prompt('Zadejte heslo pro zabezpečení exportu:');
             if (!password) return;
 
+            // Validace hesla
+            const passwordValidation = security.validatePassword(password);
+            if (!passwordValidation.valid) {
+                this.showStatus('error', passwordValidation.message);
+                return;
+            }
+
             // Přidat API klíče pokud je to povoleno
             if (CONFIG.EXPORT.INCLUDE.API_KEYS) {
-                config.apiKeys = security.exportSecureData(password);
+                config.apiKeys = await security.exportSecureData(password);
             }
 
             // Vytvořit blob a stáhnout
@@ -418,7 +467,7 @@ class SettingsManager {
                     if (!password) return;
 
                     // Import API klíčů
-                    const imported = security.importSecureData(config.apiKeys, password);
+                    const imported = await security.importSecureData(config.apiKeys, password);
                     if (!imported) {
                         throw new Error('Nesprávné heslo');
                     }
@@ -428,7 +477,16 @@ class SettingsManager {
                 if (config.settings) {
                     Object.entries(config.settings).forEach(([key, value]) => {
                         if (value !== null && value !== undefined) {
-                            localStorage.setItem(CONFIG.STORAGE.PREFIX + key, value);
+                            const storageKey = {
+                                'theme': CONFIG.STORAGE.KEYS.SELECTED_THEME,
+                                'selectedModel': CONFIG.STORAGE.KEYS.SELECTED_MODEL,
+                                'visibleModels': CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS,
+                                'assistantId': CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID
+                            }[key];
+                            
+                            if (storageKey) {
+                                localStorage.setItem(CONFIG.STORAGE.PREFIX + storageKey, value);
+                            }
                         }
                     });
                 }
@@ -472,6 +530,41 @@ class SettingsManager {
             statusDiv.className = 'settings-status';
             statusDiv.textContent = '';
         }
+    }
+
+    // Helper pro správu event listenerů
+    addEventListener(element, event, handler) {
+        if (!element) return;
+        
+        // Uložit referenci pro pozdější cleanup
+        if (!this.eventListeners.has(element)) {
+            this.eventListeners.set(element, new Map());
+        }
+        
+        const elementListeners = this.eventListeners.get(element);
+        
+        // Odstranit předchozí listener pokud existuje
+        if (elementListeners.has(event)) {
+            element.removeEventListener(event, elementListeners.get(event));
+        }
+        
+        // Přidat nový listener
+        element.addEventListener(event, handler);
+        elementListeners.set(event, handler);
+    }
+
+    // Cleanup event listenerů
+    cleanup() {
+        // Odstranit všechny event listenery
+        this.eventListeners.forEach((listeners, element) => {
+            listeners.forEach((handler, event) => {
+                element.removeEventListener(event, handler);
+            });
+        });
+        
+        this.eventListeners.clear();
+        
+        console.log('🧹 Settings cleanup completed');
     }
 }
 
