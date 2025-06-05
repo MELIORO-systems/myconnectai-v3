@@ -340,6 +340,12 @@ class UIManager {
         }
     }
 
+    // Aktualizovat indikátor modelu (volá se z model manageru)
+    updateModelIndicator(modelId) {
+        // Tato funkce již není potřeba, protože model selector je v nastavení
+        console.log(`Model changed to: ${modelId}`);
+    }
+
     // === EVENT LISTENERS ===
     
     setupEventListeners() {
