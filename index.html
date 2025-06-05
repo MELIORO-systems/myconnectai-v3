@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyConnectAI v2 - Multi-Model Chat</title>
+    
+    <!-- Styly -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- HLAVIČKA -->
+        <div class="chat-header">
+            <div class="header-content">
+                <h1><a href="#" onclick="location.reload(); return false;" class="header-logo-link">MyConnectAI v2</a></h1>
+                <div class="header-subtitle">Multi-Model AI Assistant</div>
+            </div>
+            <div class="header-buttons">
+                <button class="action-button" onclick="if(window.uiManager) window.uiManager.showWelcomeScreen()" title="Znovu načíst chat">
+                    Reload
+                </button>
+                
+                <!-- Menu dropdown -->
+                <div class="dropdown">
+                    <button class="action-button menu-button" onclick="if(window.uiManager) window.uiManager.toggleMenu()">
+                        Menu ▼
+                    </button>
+                    <div class="dropdown-content" id="mainMenu">
+                        <a href="#" onclick="if(window.uiManager) window.uiManager.showAbout(); return false;">O projektu</a>
+                        <a href="#" onclick="if(window.settingsManager) window.settingsManager.open(); return false;">Nastavení</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CHAT OBLAST -->
+        <div id="chat-messages" class="chat-messages">
+            <div class="welcome-container">
+                <div class="welcome-content">
+                    <h2 class="welcome-title">Vítejte v MyConnectAI v2</h2>
+                    <p class="welcome-subtitle">Vyberte si AI model a začněte konverzaci</p>
+                </div>
+                <div class="example-queries" id="example-queries">
+                    <!-- Příklady budou načteny dynamicky -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- INPUT OBLAST -->
+        <div class="chat-input-area" id="chat-input-area">
+            <textarea id="chat-input" class="chat-input" placeholder="Napište svůj dotaz..." rows="1"></textarea>
+            <button id="send-button" class="send-button" onclick="sendMessage()">
+                Odeslat
+            </button>
+        </div>
+        
+        <!-- PATIČKA -->
+        <div class="app-footer">
+            <div class="footer-content">
+                <span class="footer-text">Powered by <a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link"><strong>MELIORO Systems</strong></a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRO NASTAVENÍ -->
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nastavení</h2>
+                <button class="close-button" onclick="if(window.settingsManager) window.settingsManager.close()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Výběr modelu -->
+                <div class="settings-section">
+                    <h3>AI Model</h3>
+                    <select id="model-select" class="settings-select">
+                        <!-- Modely budou načteny dynamicky -->
+                    </select>
+                </div>
+                
+                <!-- Výběr tématu -->
+                <div class="settings-section">
+                    <h3>Vzhled</h3>
+                    <div class="theme-selector">
+                        <button class="theme-btn theme-claude" data-theme="claude" title="Claude téma"></button>
+                        <button class="theme-btn theme-google" data-theme="google" title="Google téma"></button>
+                        <button class="theme-btn theme-replit" data-theme="replit" title="Tmavé téma"></button>
+                        <button class="theme-btn theme-carrd" data-theme="carrd" title="Carrd téma"></button>
+                    </div>
+                </div>
+                
+                <!-- API klíče -->
+                <div class="settings-section">
+                    <h3>API Klíče</h3>
+                    
+                    <div class="api-key-group">
+                        <label>OpenAI API Key</label>
+                        <div class="input-group">
+                            <input type="password" id="openai-api-key" placeholder="sk-..." class="api-key-input">
+                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('openai-api-key')">Zobrazit</button>
+                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('openai')">Test</button>
+                        </div>
+                        <small>Získejte na <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></small>
+                    </div>
+                    
+                    <div class="api-key-group">
+                        <label>Anthropic API Key (Claude)</label>
+                        <div class="input-group">
+                            <input type="password" id="anthropic-api-key" placeholder="sk-ant-..." class="api-key-input">
+                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('anthropic-api-key')">Zobrazit</button>
+                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('anthropic')">Test</button>
+                        </div>
+                        <small>Získejte na <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></small>
+                    </div>
+                    
+                    <div class="api-key-group">
+                        <label>Google API Key (Gemini)</label>
+                        <div class="input-group">
+                            <input type="password" id="google-api-key" placeholder="AIza..." class="api-key-input">
+                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('google-api-key')">Zobrazit</button>
+                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('google')">Test</button>
+                        </div>
+                        <small>Získejte na <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></small>
+                    </div>
+                </div>
+                
+                <!-- Specifická nastavení -->
+                <div class="settings-section" id="model-specific-settings">
+                    <h3>Specifická nastavení modelu</h3>
+                    
+                    <div id="openai-settings" style="display: none;">
+                        <label>OpenAI Assistant ID (pro Agent mode)</label>
+                        <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input">
+                        <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
+                    </div>
+                </div>
+                
+                <!-- Export/Import -->
+                <div class="settings-section">
+                    <h3>Záloha konfigurace</h3>
+                    <div class="export-import-buttons">
+                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.exportConfig()">
+                            📤 Export nastavení
+                        </button>
+                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.importConfig()">
+                            📥 Import nastavení
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="settings-status" id="settings-status"></div>
+                <button class="save-button" onclick="if(window.settingsManager) window.settingsManager.save()">
+                    Uložit nastavení
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKRIPTY -->
+    
+    <!-- 1. Konfigurace -->
+    <script src="config.js"></script>
+    
+    <!-- 2. Bezpečnost -->
+    <script src="security.js"></script>
+    
+    <!-- 3. Models Registry -->
+    <script src="models-registry.js"></script>
+    
+    <!-- 4. Managers -->
+    <script src="model-manager.js"></script>
+    <script src="model-loader.js"></script>
+    <script src="ui-manager.js"></script>
+    <script src="settings-manager.js"></script>
+    
+    <!-- 5. Model implementace -->
+    <script src="model-openai.js"></script>
+    <!-- Budoucí modely:
+    <script src="model-claude.js"></script>
+    <script src="model-gemini.js"></script>
+    -->
+    
+    <!-- 6. Hlavní aplikace -->
+    <script src="main.js"></script>
+    
+    <!-- 7. Inicializace -->
+    <script>
+        console.log('🚀 MyConnectAI v2 with Settings loaded');
+    </script>
+</body>
+</html>
