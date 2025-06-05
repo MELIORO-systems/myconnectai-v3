@@ -26,7 +26,26 @@ class SecurityManager {
         const keyName = CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.DEVICE_KEY;
         let keyData = localStorage.getItem(keyName);
         
-        if (!keyData) {
+        // Ověřit že klíč je v správném formátu
+        let validKey = false;
+        if (keyData) {
+            try {
+                const keyObj = JSON.parse(keyData);
+                // Validovat že je to správný JWK objekt
+                validKey = keyObj.kty && keyObj.k && keyObj.alg;
+            } catch (e) {
+                // Není validní JSON
+                validKey = false;
+            }
+        }
+        
+        if (!keyData || !validKey) {
+            // Vyčistit případná stará data
+            if (keyData && !validKey) {
+                console.log('🧹 Removing invalid/old device key');
+                localStorage.removeItem(keyName);
+            }
+            
             // Generovat nový klíč
             this.cryptoKey = await crypto.subtle.generateKey(
                 {
@@ -42,7 +61,7 @@ class SecurityManager {
             localStorage.setItem(keyName, JSON.stringify(exportedKey));
             console.log('🔑 New device key generated');
         } else {
-            // Importovat existující klíč
+            // Načíst existující validní klíč
             const keyObj = JSON.parse(keyData);
             this.cryptoKey = await crypto.subtle.importKey(
                 'jwk',
