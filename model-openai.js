@@ -1,5 +1,5 @@
 // OpenAI Model Implementation
-// Verze: 2.0 - Pro MyConnectAI v3 s lokálním ukládáním
+// Verze: 2.1 - S timeout a vylepšeným error handling
 
 class OpenAIModel {
     constructor(modelId, modelDef) {
@@ -40,13 +40,16 @@ class OpenAIModel {
         console.log(`✅ OpenAI model ready: ${this.id}`);
     }
 
-    // Poslat zprávu
+    // Poslat zprávu s vylepšeným error handling a timeout
     async sendMessage(messages, options = {}) {
         // Získat API klíč
-        const apiKey = options.apiKey || window.modelManager?.getApiKey('openai');
+        const apiKey = options.apiKey || await window.modelManager?.getApiKey('openai');
         
         if (!apiKey) {
-            throw new Error('OpenAI API key not configured');
+            throw new window.ConfigurationError(
+                'OpenAI API key not configured',
+                'NO_API_KEY'
+            );
         }
 
         // Připravit zprávy
@@ -70,16 +73,25 @@ class OpenAIModel {
 
         console.log(`💬 Sending request to OpenAI (${this.model})...`);
 
+        // Vytvořit AbortController pro timeout
+        const controller = new AbortController();
+        const timeout = setTimeout(() => {
+            controller.abort();
+        }, options.timeout || CONFIG.API.TIMEOUT || 30000);
+
         try {
-            // Volat OpenAI API
+            // Volat OpenAI API s timeout
             const response = await fetch(this.apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify(requestPayload)
+                body: JSON.stringify(requestPayload),
+                signal: controller.signal
             });
+
+            clearTimeout(timeout);
 
             // Zpracovat odpověď
             const data = await response.json();
@@ -88,16 +100,48 @@ class OpenAIModel {
                 console.error('OpenAI API error:', data);
                 this.stats.errors++;
                 
-                // Specifické chybové hlášky
+                // Vytvořit specifickou chybu
                 if (response.status === 401) {
-                    throw new Error('Neplatný API klíč');
+                    throw new window.APIError(
+                        'Invalid API key',
+                        401,
+                        'openai'
+                    );
                 } else if (response.status === 429) {
-                    throw new Error('Překročen limit požadavků');
+                    // Extrahovat informace o rate limitu
+                    const retryAfter = response.headers.get('Retry-After');
+                    throw new window.APIError(
+                        `Rate limit exceeded${retryAfter ? `. Retry after ${retryAfter}s` : ''}`,
+                        429,
+                        'openai'
+                    );
+                } else if (response.status === 503) {
+                    throw new window.APIError(
+                        'OpenAI service temporarily unavailable',
+                        503,
+                        'openai'
+                    );
                 } else if (data.error?.message) {
-                    throw new Error(data.error.message);
+                    throw new window.APIError(
+                        data.error.message,
+                        response.status,
+                        'openai'
+                    );
                 } else {
-                    throw new Error(`API error: ${response.status}`);
+                    throw new window.APIError(
+                        `API error: ${response.status}`,
+                        response.status,
+                        'openai'
+                    );
                 }
+            }
+
+            // Validovat odpověď
+            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                throw new window.ModelError(
+                    'Invalid response format from OpenAI',
+                    'INVALID_RESPONSE'
+                );
             }
 
             // Aktualizovat statistiky
@@ -110,9 +154,38 @@ class OpenAIModel {
             return data.choices[0].message.content;
 
         } catch (error) {
+            clearTimeout(timeout);
             console.error('OpenAI request failed:', error);
             this.stats.errors++;
-            throw error;
+            
+            // Převést AbortError na timeout error
+            if (error.name === 'AbortError') {
+                throw new window.ModelError(
+                    'Request timeout - OpenAI is taking too long to respond',
+                    'TIMEOUT',
+                    { timeout: CONFIG.API.TIMEOUT }
+                );
+            }
+            
+            // Pokud je to už naše chyba, prostě ji předat dál
+            if (error instanceof window.ModelError || error instanceof window.APIError) {
+                throw error;
+            }
+            
+            // Network errors
+            if (error.message?.includes('Failed to fetch')) {
+                throw new window.ModelError(
+                    'Network error - unable to connect to OpenAI',
+                    'NETWORK_ERROR'
+                );
+            }
+            
+            // Ostatní chyby
+            throw new window.ModelError(
+                error.message || 'Unknown error',
+                'UNKNOWN_ERROR',
+                { originalError: error.toString() }
+            );
         }
     }
 
@@ -142,6 +215,12 @@ class OpenAIModel {
             maxTokens: this.maxTokens,
             stats: this.getStats()
         };
+    }
+    
+    // Cleanup
+    destroy() {
+        this.resetStats();
+        this.initialized = false;
     }
 }
 
