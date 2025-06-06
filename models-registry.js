@@ -1,5 +1,5 @@
 // Models Registry - Centrální definice všech AI modelů
-// Verze: 1.0
+// Verze: 2.0 - S přidanými Perplexity, Together AI a Cohere modely
 // 
 // Tento soubor obsahuje definice VŠECH dostupných modelů.
 // Pro přidání nového modelu stačí přidat nový objekt do pole MODELS_REGISTRY.
@@ -75,13 +75,13 @@ const MODELS_REGISTRY = [
         }
     },
     
-    // === ANTHROPIC MODELS ===
+    // === ANTHROPIC MODELS === (ZAKÁZÁNO - CORS)
     {
         id: "claude-3-opus-20240229",
         provider: "anthropic",
         name: "Claude 3 Opus",
-        enabled: true,
-        visible: true,
+        enabled: false, // CORS blokuje
+        visible: false,
         config: {
             model: "claude-3-opus-20240229",
             contextWindow: 200000,
@@ -97,8 +97,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-5-sonnet-20241022",
         provider: "anthropic",
         name: "Claude 3.5 Sonnet",
-        enabled: true,
-        visible: true,
+        enabled: false, // CORS blokuje
+        visible: false,
         config: {
             model: "claude-3-5-sonnet-20241022",
             contextWindow: 200000,
@@ -114,8 +114,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-haiku-20240307",
         provider: "anthropic",
         name: "Claude 3 Haiku",
-        enabled: true,
-        visible: true,
+        enabled: false, // CORS blokuje
+        visible: false,
         config: {
             model: "claude-3-haiku-20240307",
             contextWindow: 200000,
@@ -128,7 +128,183 @@ const MODELS_REGISTRY = [
         }
     },
     
-    // === GOOGLE MODELS ===
+    // === PERPLEXITY MODELS ===
+    {
+        id: "pplx-7b-online",
+        provider: "perplexity",
+        name: "Perplexity 7B Online",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "pplx-7b-online",
+            contextWindow: 4096,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "search", "analysis"],
+            description: "Rychlý model s přístupem k aktuálním informacím z webu",
+            endpoint: "https://api.perplexity.ai/chat/completions",
+            onlineSearch: true
+        }
+    },
+    {
+        id: "pplx-70b-online",
+        provider: "perplexity",
+        name: "Perplexity 70B Online",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "pplx-70b-online",
+            contextWindow: 4096,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "search", "analysis", "reasoning"],
+            description: "Výkonný model s přístupem k aktuálním informacím z webu",
+            endpoint: "https://api.perplexity.ai/chat/completions",
+            onlineSearch: true
+        }
+    },
+    {
+        id: "llama-3.1-sonar-small-128k-online",
+        provider: "perplexity",
+        name: "Llama 3.1 Sonar Small",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "llama-3.1-sonar-small-128k-online",
+            contextWindow: 127072,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "search", "analysis"],
+            description: "Llama model s velkým kontextem a online search",
+            endpoint: "https://api.perplexity.ai/chat/completions",
+            onlineSearch: true
+        }
+    },
+    
+    // === TOGETHER AI MODELS ===
+    {
+        id: "mistral-7b-instruct",
+        provider: "together",
+        name: "Mistral 7B Instruct",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "mistralai/Mistral-7B-Instruct-v0.2",
+            contextWindow: 32768,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis", "coding"],
+            description: "Rychlý open-source model s výbornou češtinou",
+            endpoint: "https://api.together.xyz/v1/chat/completions",
+            modelType: "instruct"
+        }
+    },
+    {
+        id: "mixtral-8x7b",
+        provider: "together",
+        name: "Mixtral 8x7B",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            contextWindow: 32768,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis", "reasoning", "coding"],
+            description: "Výkonný MoE model s vynikající češtinou",
+            endpoint: "https://api.together.xyz/v1/chat/completions",
+            modelType: "instruct"
+        }
+    },
+    {
+        id: "llama-2-70b-chat",
+        provider: "together",
+        name: "Llama 2 70B Chat",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "meta-llama/Llama-2-70b-chat-hf",
+            contextWindow: 4096,
+            maxTokens: 2048,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis", "reasoning"],
+            description: "Velký model od Meta s dobrou češtinou",
+            endpoint: "https://api.together.xyz/v1/chat/completions",
+            modelType: "chat",
+            stopSequences: ["[/INST]", "</s>"]
+        }
+    },
+    {
+        id: "llama-3-70b-instruct",
+        provider: "together",
+        name: "Llama 3 70B Instruct",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+            contextWindow: 8192,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis", "reasoning", "coding"],
+            description: "Nejnovější Llama model s vylepšenou češtinou",
+            endpoint: "https://api.together.xyz/v1/chat/completions",
+            modelType: "instruct"
+        }
+    },
+    
+    // === COHERE MODELS ===
+    {
+        id: "command",
+        provider: "cohere",
+        name: "Command",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "command",
+            contextWindow: 4096,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis"],
+            description: "Výkonný model pro konverzaci a analýzu",
+            endpoint: "https://api.cohere.ai/v1/chat",
+            preamble: "Jsi přátelský a nápomocný AI asistent. Odpovídáš v češtině, pokud není požadováno jinak."
+        }
+    },
+    {
+        id: "command-light",
+        provider: "cohere",
+        name: "Command Light",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "command-light",
+            contextWindow: 4096,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat"],
+            description: "Rychlý a levný model pro jednoduché úlohy",
+            endpoint: "https://api.cohere.ai/v1/chat"
+        }
+    },
+    {
+        id: "command-r",
+        provider: "cohere",
+        name: "Command R",
+        enabled: false, // Změňte na true až budete mít API klíč
+        visible: false,
+        config: {
+            model: "command-r",
+            contextWindow: 128000,
+            maxTokens: 4096,
+            temperature: 0.7,
+            capabilities: ["chat", "analysis", "search"],
+            description: "Model s velkým kontextem a RAG schopnostmi",
+            endpoint: "https://api.cohere.ai/v1/chat",
+            connectors: [] // Může používat web search
+        }
+    },
+    
+    // === GOOGLE MODELS === (PŘIPRAVENO PRO BUDOUCNOST)
     {
         id: "gemini-pro",
         provider: "google",
