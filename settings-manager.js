@@ -61,6 +61,8 @@ class SettingsManager {
         // Získat enabled providery z registry
         const enabledProviders = this.getEnabledProviders();
         
+        console.log('Loading hierarchical settings for providers:', enabledProviders);
+        
         // Vyčistit existující provider sekce
         const providersContainer = document.getElementById('providers-settings');
         if (providersContainer) {
@@ -125,6 +127,12 @@ class SettingsManager {
         
         if (window.ModelsRegistryHelper) {
             const allModels = window.ModelsRegistryHelper.getEnabledModels();
+            return allModels.filter(model => model.provider === provider);
+        }
+        
+        // Fallback - získat z model manageru
+        if (window.modelManager) {
+            const allModels = window.modelManager.getAllModels();
             return allModels.filter(model => model.provider === provider);
         }
         
@@ -199,12 +207,8 @@ class SettingsManager {
     
     // Vytvořit nastavení pro konkrétní model
     createModelSettings(modelDef) {
-        // Speciální nastavení pro OpenAI modely
-        // Zkontrolovat jestli JAKÝKOLIV OpenAI model má capability "assistant"
-        // nebo zobrazit pro všechny GPT-4 modely
-        if (modelDef.provider === 'openai' && 
-            (modelDef.id.includes('gpt-4') || modelDef.config?.capabilities?.includes('assistant'))) {
-            
+        // Speciální nastavení pro OpenAI modely s podporou Assistant
+        if (modelDef.provider === 'openai' && modelDef.config?.assistant === true) {
             const group = document.createElement('div');
             group.className = 'model-settings-group';
             
@@ -230,6 +234,14 @@ class SettingsManager {
             
             return group;
         }
+        
+        // Zde můžete přidat další speciální nastavení pro jiné features
+        // Například pro modely s vision podporou:
+        /*
+        if (modelDef.config?.vision === true) {
+            // Přidat nastavení pro vision mode
+        }
+        */
         
         return null;
     }
@@ -259,14 +271,29 @@ class SettingsManager {
         
         if (window.ModelsRegistryHelper) {
             const enabledModels = window.ModelsRegistryHelper.getEnabledModels();
+            console.log('Enabled models from registry:', enabledModels);
+            
             enabledModels.forEach(model => {
                 if (model.provider) {
                     enabledProviders.add(model.provider);
                 }
             });
+        } else {
+            console.warn('ModelsRegistryHelper not available, using model manager');
+            // Fallback - použít model manager
+            if (window.modelManager) {
+                const allModels = window.modelManager.getAllModels();
+                allModels.forEach(model => {
+                    if (model.provider) {
+                        enabledProviders.add(model.provider);
+                    }
+                });
+            }
         }
         
-        return Array.from(enabledProviders);
+        const result = Array.from(enabledProviders);
+        console.log('Enabled providers:', result);
+        return result;
     }
 
     // Načíst model selector - async verze
@@ -282,12 +309,17 @@ class SettingsManager {
             await window.modelManager.initialize();
         }
 
-        // Získat VŠECHNY modely (včetně neviditelných)
-        const allModels = window.modelManager.getAllModels();
+        // Získat VIDITELNÉ modely (ne všechny)
+        const visibleModels = window.modelManager.getAvailableModels();
         const activeModel = window.modelManager.getActiveModel();
 
         // Vyčistit loading option
         select.innerHTML = '';
+        
+        if (visibleModels.length === 0) {
+            select.innerHTML = '<option value="">Žádné dostupné modely</option>';
+            return;
+        }
         
         // Seskupit modely podle providera
         const modelsByProvider = {
@@ -296,14 +328,10 @@ class SettingsManager {
             google: []
         };
         
-        // Filtrovat pouze ENABLED modely z registry
-        allModels.forEach(model => {
-            // Získat model definition z registry
-            const modelDef = window.ModelsRegistryHelper?.getModelById(model.id);
-            if (modelDef && modelDef.enabled) {
-                if (modelsByProvider[model.provider]) {
-                    modelsByProvider[model.provider].push(model);
-                }
+        // Rozdělit viditelné modely podle providera
+        visibleModels.forEach(model => {
+            if (modelsByProvider[model.provider]) {
+                modelsByProvider[model.provider].push(model);
             }
         });
 
