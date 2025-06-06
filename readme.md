@@ -108,7 +108,8 @@ const CONFIG = {
         temperature: 0.7,
         capabilities: ["chat", "analysis", "reasoning", "coding", "vision"],
         description: "Nejvýkonnější model od Anthropic",
-        endpoint: "https://api.anthropic.com/v1/messages"
+        endpoint: "https://api.anthropic.com/v1/messages",
+        assistant: false   // true = zobrazí Assistant ID nastavení (pouze OpenAI)
     }
 }
 ```
@@ -202,7 +203,7 @@ Aplikace má 4 barevná témata definovaná v `style.css`:
 
 ## 📁 Hierarchická nastavení
 
-Nastavení jsou organizována hierarchicky:
+Nastavení jsou organizována hierarchicky podle providerů a modelů:
 
 ```
 Nastavení
@@ -210,12 +211,26 @@ Nastavení
 ├── Vzhled (výběr tématu)
 ├── OpenAI (zobrazí se pouze pokud jsou enabled OpenAI modely)
 │   ├── API Key
-│   └── GPT-4 nastavení
-│       └── Assistant ID (pouze pro modely s capability "assistant")
+│   ├── Security info s odkazem na detaily
+│   └── Model-specific nastavení
+│       └── Assistant ID (pouze pro modely s assistant: true)
 ├── Anthropic (pouze pro enabled Anthropic modely)
 │   └── API Key
 └── Google (pouze pro enabled Google modely)
     └── API Key
+```
+
+### Model-specific parametry v config:
+
+```javascript
+config: {
+    // ... ostatní nastavení ...
+    assistant: true,   // Zobrazí pole pro Assistant ID (OpenAI)
+    // Budoucí rozšíření:
+    vision: true,      // Pro podporu obrázků
+    plugins: false,    // Pro podporu pluginů
+    streaming: true    // Pro streaming odpovědí
+}
 ```
 
 ### Přidání nového nastavení pro model:
@@ -223,7 +238,8 @@ Nastavení
 V `settings-manager.js` metodě `createModelSettings()`:
 
 ```javascript
-if (modelDef.config?.capabilities?.includes('vision')) {
+// Příklad pro vision mode
+if (modelDef.config?.vision === true) {
     // Přidat UI pro vision nastavení
     group.innerHTML += `
         <div class="setting-item">
@@ -247,11 +263,19 @@ if (modelDef.config?.capabilities?.includes('vision')) {
 - Nikdy nejsou poslány nikam jinam než přímo na API endpoint
 - Jsou šifrovány v localStorage
 - Při exportu jsou dodatečně šifrovány heslem
+- V nastavení je informační panel vysvětlující zabezpečení
 
 ### Export/Import
 - Používá PBKDF2 pro odvození klíče z hesla
 - 100,000 iterací
 - Salt je součástí exportu
+
+### Informace o zabezpečení pro uživatele
+Aplikace obsahuje informační panel v nastavení, který uživatelům vysvětluje:
+- Lokální ukládání dat
+- Šifrování AES-256
+- Přímou komunikaci s AI službami
+- Že nesbíráme žádná data
 
 ## 🛠️ Údržba a debugging
 
