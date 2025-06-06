@@ -1,10 +1,11 @@
 // Model Loader - Automatické načítání a registrace modelů
-// Verze: 1.0
+// Verze: 2.0 - S vylepšeným error handling
 
 class ModelLoader {
     constructor() {
         this.loadedModels = new Map();
         this.initialized = false;
+        this.failedModels = new Map(); // Pro tracking selhání
     }
 
     // Hlavní inicializační funkce
@@ -38,7 +39,15 @@ class ModelLoader {
     async loadModelsFromRegistry() {
         console.log('📦 Loading models from registry...');
         
+        if (!window.ModelsRegistryHelper) {
+            throw new Error('ModelsRegistryHelper not available');
+        }
+        
         const enabledModels = ModelsRegistryHelper.getEnabledModels();
+        console.log(`📋 Found ${enabledModels.length} enabled models`);
+        
+        let successCount = 0;
+        let failCount = 0;
         
         for (const modelDef of enabledModels) {
             try {
@@ -47,75 +56,116 @@ class ModelLoader {
                 
                 if (modelInstance) {
                     // Registruj model v Model Manageru
-                    window.modelManager.registerModel(modelDef.id, modelInstance);
-                    this.loadedModels.set(modelDef.id, modelDef);
-                    console.log(`✅ Loaded model: ${modelDef.id}`);
+                    if (window.modelManager) {
+                        window.modelManager.registerModel(modelDef.id, modelInstance);
+                        this.loadedModels.set(modelDef.id, modelDef);
+                        successCount++;
+                        console.log(`✅ Loaded model: ${modelDef.id}`);
+                    } else {
+                        throw new Error('Model Manager not available');
+                    }
+                } else {
+                    throw new Error(`Failed to create instance for model: ${modelDef.id}`);
                 }
             } catch (error) {
+                failCount++;
+                this.failedModels.set(modelDef.id, error.message);
                 console.error(`❌ Failed to load model ${modelDef.id}:`, error);
+                
+                // Pokračovat s dalšími modely i při selhání
+                continue;
             }
+        }
+        
+        console.log(`📊 Model loading complete: ${successCount} success, ${failCount} failed`);
+        
+        // Pokud se nepodařilo načíst žádný model, je to kritická chyba
+        if (successCount === 0 && enabledModels.length > 0) {
+            throw new Error('Failed to load any models');
         }
     }
 
     // Vytvořit instanci modelu podle providera
     async createModelInstance(modelDef) {
-        switch (modelDef.provider) {
-            case 'openai':
-                // Dynamicky načíst OpenAI model
-                if (window.OpenAIModel) {
-                    return new OpenAIModel(modelDef.id, modelDef);
-                }
-                console.warn('OpenAI model implementation not found');
-                break;
-                
-            case 'anthropic':
-                // Pro budoucí implementaci
-                if (window.AnthropicModel) {
-                    return new AnthropicModel(modelDef.id, modelDef);
-                }
-                console.warn('Anthropic model implementation not found');
-                break;
-                
-            case 'google':
-                // Pro budoucí implementaci
-                if (window.GoogleModel) {
-                    return new GoogleModel(modelDef.id, modelDef);
-                }
-                console.warn('Google model implementation not found');
-                break;
-                
-            default:
-                console.warn(`Unknown provider: ${modelDef.provider}`);
-                return null;
+        if (!modelDef || !modelDef.provider) {
+            throw new Error('Invalid model definition');
+        }
+        
+        try {
+            switch (modelDef.provider) {
+                case 'openai':
+                    // Dynamicky načíst OpenAI model
+                    if (window.OpenAIModel) {
+                        return new OpenAIModel(modelDef.id, modelDef);
+                    } else {
+                        throw new Error('OpenAI model implementation not found');
+                    }
+                    
+                case 'anthropic':
+                    // Pro budoucí implementaci
+                    if (window.AnthropicModel) {
+                        return new AnthropicModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Anthropic model implementation not found - skipping');
+                        return null;
+                    }
+                    
+                case 'google':
+                    // Pro budoucí implementaci
+                    if (window.GoogleModel) {
+                        return new GoogleModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Google model implementation not found - skipping');
+                        return null;
+                    }
+                    
+                default:
+                    console.warn(`Unknown provider: ${modelDef.provider}`);
+                    return null;
+            }
+        } catch (error) {
+            // Přidat kontext k chybě
+            error.message = `Error creating ${modelDef.provider} model instance: ${error.message}`;
+            throw error;
         }
     }
 
     // Načíst uživatelské preference
     loadUserPreferences() {
-        // Načíst viditelnost modelů
-        const savedVisibility = localStorage.getItem(
-            CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS
-        );
-        
-        if (savedVisibility) {
-            try {
-                const visibleModels = JSON.parse(savedVisibility);
-                
-                // Aplikovat viditelnost na modely
-                for (const [modelId, modelDef] of this.loadedModels) {
-                    const model = window.modelManager.models.get(modelId);
-                    if (model) {
-                        model.visible = visibleModels.includes(modelId);
+        try {
+            // Načíst viditelnost modelů
+            const savedVisibility = localStorage.getItem(
+                CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS
+            );
+            
+            if (savedVisibility) {
+                try {
+                    const visibleModels = JSON.parse(savedVisibility);
+                    
+                    if (!Array.isArray(visibleModels)) {
+                        throw new Error('Invalid visibility data format');
                     }
+                    
+                    // Aplikovat viditelnost na modely
+                    for (const [modelId, modelDef] of this.loadedModels) {
+                        const model = window.modelManager?.models.get(modelId);
+                        if (model) {
+                            model.visible = visibleModels.includes(modelId);
+                        }
+                    }
+                    
+                    console.log('📋 Applied user visibility preferences');
+                } catch (error) {
+                    console.error('Error loading visibility preferences:', error);
+                    // Pokračovat s výchozím nastavením
                 }
-                
-                console.log('📋 Applied user visibility preferences');
-            } catch (error) {
-                console.error('Error loading visibility preferences:', error);
+            } else {
+                // Použít výchozí viditelnost z registry
+                console.log('📋 Using default visibility from registry');
             }
-        } else {
-            // Použít výchozí viditelnost z registry
-            console.log('📋 Using default visibility from registry');
+        } catch (error) {
+            console.error('Error in loadUserPreferences:', error);
+            // Není kritická chyba, pokračovat
         }
     }
 
@@ -124,27 +174,37 @@ class ModelLoader {
         console.log('📋 Model Registry Debug Info:');
         console.log(`- Total models in registry: ${MODELS_REGISTRY.length}`);
         console.log(`- Enabled models: ${ModelsRegistryHelper.getEnabledModels().length}`);
-        console.log(`- Loaded models: ${this.loadedModels.size}`);
+        console.log(`- Successfully loaded models: ${this.loadedModels.size}`);
+        console.log(`- Failed models: ${this.failedModels.size}`);
+        
+        if (this.failedModels.size > 0) {
+            console.log('\n❌ Failed models:');
+            this.failedModels.forEach((error, modelId) => {
+                console.log(`  - ${modelId}: ${error}`);
+            });
+        }
         
         // Detailní info o každém modelu
-        const allModels = window.modelManager.getAllModels();
-        const visibleModels = window.modelManager.getAvailableModels();
-        
-        console.log(`- Configured models: ${allModels.length}`);
-        console.log(`- Visible models: ${visibleModels.length}`);
-        
-        console.log('\n✅ Ready models:');
-        visibleModels.forEach(model => {
-            console.log(`  - ${model.name} (${model.id})`);
-        });
-        
-        // Kontrola API klíčů
-        console.log('\n🔑 API Keys status:');
-        const providers = ModelsRegistryHelper.getProviders();
-        providers.forEach(provider => {
-            const hasKey = window.modelManager.checkApiKey(provider);
-            console.log(`  - ${provider}: ${hasKey ? '✅ configured' : '❌ missing'}`);
-        });
+        if (window.modelManager) {
+            const allModels = window.modelManager.getAllModels();
+            const visibleModels = window.modelManager.getAvailableModelsSync();
+            
+            console.log(`\n- Configured models: ${allModels.length}`);
+            console.log(`- Visible models: ${visibleModels.length}`);
+            
+            console.log('\n✅ Ready models:');
+            visibleModels.forEach(model => {
+                console.log(`  - ${model.name} (${model.id})`);
+            });
+            
+            // Kontrola API klíčů - používat sync verzi pro debug
+            console.log('\n🔑 API Keys status:');
+            const providers = ModelsRegistryHelper.getProviders();
+            providers.forEach(provider => {
+                const hasKey = window.modelManager.hasApiKeyCached(provider);
+                console.log(`  - ${provider}: ${hasKey ? '✅ configured' : '❌ missing'}`);
+            });
+        }
     }
 
     // Získat statistiky o načtených modelech
@@ -153,8 +213,17 @@ class ModelLoader {
             totalInRegistry: MODELS_REGISTRY.length,
             enabledInRegistry: ModelsRegistryHelper.getEnabledModels().length,
             loadedModels: this.loadedModels.size,
-            visibleModels: window.modelManager.getAvailableModels().length
+            failedModels: this.failedModels.size,
+            visibleModels: window.modelManager?.getAvailableModelsSync().length || 0
         };
+    }
+
+    // Získat seznam selhání
+    getFailedModels() {
+        return Array.from(this.failedModels.entries()).map(([id, error]) => ({
+            id,
+            error
+        }));
     }
 
     // Reload modelů (pro případnou aktualizaci)
@@ -163,6 +232,8 @@ class ModelLoader {
         
         // Vyčistit existující modely
         this.loadedModels.clear();
+        this.failedModels.clear();
+        this.initialized = false;
         
         // Znovu načíst
         await this.initialize();
@@ -172,4 +243,4 @@ class ModelLoader {
 // Vytvořit globální instanci
 window.modelLoader = new ModelLoader();
 
-console.log('📦 Model Loader ready');
+console.log('📦 Model Loader ready (v2.0 - Fixed)');
