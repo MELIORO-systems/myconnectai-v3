@@ -1032,3 +1032,110 @@ body {
         display: none;
     }
 }
+/* Přidat tyto styly do style.css */
+
+/* === FOOTER UPDATES === */
+.footer-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.footer-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.footer-link strong {
+    font-weight: 600;
+}
+
+/* Theme-specific footer link colors */
+.theme-google .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-google .footer-link:hover {
+    color: var(--primary-hover);
+}
+
+.theme-replit .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-replit .footer-link:hover {
+    color: var(--primary-hover);
+    text-shadow: 0 0 8px var(--primary-color);
+}
+
+.theme-carrd .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-carrd .footer-link:hover {
+    color: var(--primary-hover);
+    text-shadow: 0 0 10px var(--primary-color);
+}
+
+/* === MODAL FOOTER UPDATES === */
+.modal-footer-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.cancel-button {
+    padding: 0.875rem 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-secondary);
+}
+
+/* === SELECT OPTGROUP STYLING === */
+.settings-select optgroup {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--surface);
+}
+
+.settings-select option {
+    font-weight: 400;
+    padding: 0.5rem;
+}
+
+.settings-select option:disabled {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* === API KEY GROUP VISIBILITY === */
+.api-key-group {
+    display: none; /* Výchozí - skryté, zobrazí se pouze pro enabled providery */
+}
+
+/* === RESPONSIVE UPDATES === */
+@media (max-width: 768px) {
+    .modal-footer-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .cancel-button,
+    .save-button {
+        flex: 1;
+    }
+    
+    .footer-content {
+        text-align: center;
+    }
+}
