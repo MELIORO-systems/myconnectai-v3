@@ -14,11 +14,35 @@ class SecurityManager {
     // Asynchronní inicializace
     async initialize() {
         try {
+            // Kontrola dostupnosti localStorage
+            if (!this.isLocalStorageAvailable()) {
+                throw new Error('localStorage is not available');
+            }
+            
+            // Kontrola Web Crypto API
+            if (!window.crypto || !window.crypto.subtle) {
+                throw new Error('Web Crypto API is not available');
+            }
+            
             await this.getOrCreateDeviceKey();
             this.initialized = true;
             console.log('🔐 Security Manager initialized');
         } catch (error) {
             console.error('🔐 Security Manager initialization failed:', error);
+            this.initialized = false;
+            throw error;
+        }
+    }
+    
+    // Kontrola dostupnosti localStorage
+    isLocalStorageAvailable() {
+        try {
+            const test = '__localStorage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (e) {
+            return false;
         }
     }
     
