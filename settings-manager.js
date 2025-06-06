@@ -56,7 +56,152 @@ class SettingsManager {
         console.log('⚙️ Settings closed');
     }
 
-    // Načíst aktuální nastavení
+    // Načíst nastavení podle hierarchie
+    async loadHierarchicalSettings() {
+        // Získat enabled providery z registry
+        const enabledProviders = this.getEnabledProviders();
+        
+        // Vyčistit existující provider sekce
+        const providersContainer = document.getElementById('providers-settings');
+        if (providersContainer) {
+            providersContainer.innerHTML = '';
+        }
+        
+        // Pro každého enabled providera vytvořit sekci
+        for (const provider of enabledProviders) {
+            await this.createProviderSection(provider);
+        }
+    }
+    
+    // Vytvořit sekci pro providera
+    async createProviderSection(provider) {
+        const container = document.getElementById('providers-settings');
+        if (!container) return;
+        
+        // Získat všechny enabled modely pro tohoto providera
+        const providerModels = this.getEnabledModelsForProvider(provider);
+        if (providerModels.length === 0) return;
+        
+        // Vytvořit sekci
+        const section = document.createElement('div');
+        section.className = 'settings-section provider-section';
+        section.id = `${provider}-section`;
+        
+        // Název providera
+        const title = document.createElement('h3');
+        title.textContent = this.getProviderDisplayName(provider);
+        section.appendChild(title);
+        
+        // API Key skupina
+        const apiKeyGroup = this.createApiKeyGroup(provider);
+        section.appendChild(apiKeyGroup);
+        
+        // Obecná nastavení providera (pokud existují)
+        const providerSettings = this.createProviderSettings(provider);
+        if (providerSettings) {
+            section.appendChild(providerSettings);
+        }
+        
+        // Nastavení pro jednotlivé modely
+        for (const model of providerModels) {
+            const modelSettings = this.createModelSettings(model);
+            if (modelSettings) {
+                section.appendChild(modelSettings);
+            }
+        }
+        
+        container.appendChild(section);
+        
+        // Načíst hodnoty
+        await this.loadApiKey(provider, CONFIG.STORAGE.KEYS[`${provider.toUpperCase()}_KEY`]);
+    }
+    
+    // Získat enabled modely pro providera
+    getEnabledModelsForProvider(provider) {
+        const models = [];
+        
+        if (window.ModelsRegistryHelper) {
+            const allModels = window.ModelsRegistryHelper.getEnabledModels();
+            return allModels.filter(model => model.provider === provider);
+        }
+        
+        return models;
+    }
+    
+    // Získat display název providera
+    getProviderDisplayName(provider) {
+        const names = {
+            'openai': 'OpenAI',
+            'anthropic': 'Anthropic (Claude)',
+            'google': 'Google (Gemini)'
+        };
+        return names[provider] || provider;
+    }
+    
+    // Vytvořit API key skupinu
+    createApiKeyGroup(provider) {
+        const group = document.createElement('div');
+        group.className = 'api-key-group';
+        group.innerHTML = `
+            <label>API Key</label>
+            <div class="input-group">
+                <input type="password" id="${provider}-api-key" placeholder="${this.getApiKeyPlaceholder(provider)}" class="api-key-input">
+                <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('${provider}-api-key')">Zobrazit</button>
+                <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('${provider}')">Test</button>
+            </div>
+            <small>Získejte na <a href="${this.getProviderUrl(provider)}" target="_blank">${this.getProviderDomain(provider)}</a></small>
+        `;
+        return group;
+    }
+    
+    // Získat URL pro providera
+    getProviderUrl(provider) {
+        const urls = {
+            'openai': 'https://platform.openai.com/api-keys',
+            'anthropic': 'https://console.anthropic.com/',
+            'google': 'https://aistudio.google.com/app/apikey'
+        };
+        return urls[provider] || '#';
+    }
+    
+    // Získat doménu pro providera
+    getProviderDomain(provider) {
+        const domains = {
+            'openai': 'platform.openai.com',
+            'anthropic': 'console.anthropic.com',
+            'google': 'aistudio.google.com'
+        };
+        return domains[provider] || provider;
+    }
+    
+    // Vytvořit obecná nastavení providera
+    createProviderSettings(provider) {
+        // Zatím prázdné - pro budoucí rozšíření
+        // Například: default temperature, max tokens, atd.
+        return null;
+    }
+    
+    // Vytvořit nastavení pro konkrétní model
+    createModelSettings(modelDef) {
+        // Speciální nastavení pro OpenAI modely s Assistant mode
+        if (modelDef.provider === 'openai' && modelDef.config?.capabilities?.includes('assistant')) {
+            const group = document.createElement('div');
+            group.className = 'model-settings-group';
+            group.innerHTML = `
+                <h4>${modelDef.name} - Speciální nastavení</h4>
+                <div class="setting-item">
+                    <label>OpenAI Assistant ID (pro Agent mode)</label>
+                    <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input">
+                    <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
+                </div>
+            `;
+            return group;
+        }
+        
+        return null;
+    }
+    
+    // Upravit loadCurrentSettings
     async loadCurrentSettings() {
         // Model selector
         await this.loadModelSelector();
@@ -64,8 +209,8 @@ class SettingsManager {
         // Theme selector
         this.loadThemeSelector();
         
-        // API klíče
-        await this.loadApiKeys();
+        // Hierarchická nastavení
+        await this.loadHierarchicalSettings();
         
         // Specifická nastavení modelů
         this.loadModelSpecificSettings();
@@ -161,7 +306,6 @@ class SettingsManager {
         this.addEventListener(select, 'change', () => {
             this.selectedModel = select.value;
             this.markAsChanged();
-            this.updateModelSpecificSettings();
         });
     }
 
@@ -187,36 +331,6 @@ class SettingsManager {
                 this.markAsChanged();
             });
         });
-    }
-
-    // Načíst API klíče - async verze
-    async loadApiKeys() {
-        // Získat enabled providery z registry
-        const enabledProviders = this.getEnabledProviders();
-        
-        // Skrýt všechny API key skupiny
-        document.querySelectorAll('.api-key-group').forEach(group => {
-            group.style.display = 'none';
-        });
-        
-        // Zobrazit a načíst pouze API klíče pro enabled providery
-        if (enabledProviders.includes('openai')) {
-            const openaiGroup = document.getElementById('openai-api-group');
-            if (openaiGroup) openaiGroup.style.display = 'block';
-            await this.loadApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
-        }
-        
-        if (enabledProviders.includes('anthropic')) {
-            const anthropicGroup = document.getElementById('anthropic-api-group');
-            if (anthropicGroup) anthropicGroup.style.display = 'block';
-            await this.loadApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
-        }
-        
-        if (enabledProviders.includes('google')) {
-            const googleGroup = document.getElementById('google-api-group');
-            if (googleGroup) googleGroup.style.display = 'block';
-            await this.loadApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
-        }
     }
 
     // Načíst jednotlivý API klíč - async verze
@@ -257,29 +371,10 @@ class SettingsManager {
         return placeholders[provider] || 'API Key';
     }
 
-    // Načíst specifická nastavení modelů
+    // Načíst specifická nastavení modelů (nyní je prázdné, vše je v hierarchii)
     loadModelSpecificSettings() {
-        // OpenAI Assistant ID
-        const assistantIdInput = document.getElementById('openai-assistant-id');
-        if (assistantIdInput) {
-            const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID);
-            assistantIdInput.value = savedId || '';
-            this.addEventListener(assistantIdInput, 'change', () => this.markAsChanged());
-        }
-
-        // Zobrazit/skrýt podle vybraného modelu
-        this.updateModelSpecificSettings();
-    }
-
-    // Aktualizovat zobrazení specifických nastavení
-    updateModelSpecificSettings() {
-        const openaiSettings = document.getElementById('openai-settings');
-        
-        if (this.selectedModel && this.selectedModel.startsWith('gpt-')) {
-            openaiSettings.style.display = 'block';
-        } else {
-            openaiSettings.style.display = 'none';
-        }
+        // Vše je nyní řešeno v loadHierarchicalSettings
+        // Tato funkce zůstává pro zpětnou kompatibilitu
     }
 
     // Označit jako změněno
@@ -346,16 +441,11 @@ class SettingsManager {
         const enabledProviders = this.getEnabledProviders();
         
         // Uložit pouze API klíče pro enabled providery
-        if (enabledProviders.includes('openai')) {
-            await this.saveApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
-        }
-        
-        if (enabledProviders.includes('anthropic')) {
-            await this.saveApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
-        }
-        
-        if (enabledProviders.includes('google')) {
-            await this.saveApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        for (const provider of enabledProviders) {
+            const storageKey = CONFIG.STORAGE.KEYS[`${provider.toUpperCase()}_KEY`];
+            if (storageKey) {
+                await this.saveApiKey(provider, storageKey);
+            }
         }
     }
 
@@ -417,11 +507,19 @@ class SettingsManager {
     saveModelSpecificSettings() {
         // OpenAI Assistant ID
         const assistantIdInput = document.getElementById('openai-assistant-id');
-        if (assistantIdInput && assistantIdInput.value.trim()) {
-            localStorage.setItem(
-                CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID,
-                assistantIdInput.value.trim()
-            );
+        if (assistantIdInput) {
+            const value = assistantIdInput.value.trim();
+            if (value) {
+                localStorage.setItem(
+                    CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID,
+                    value
+                );
+            } else {
+                // Pokud je prázdný, odstranit z localStorage
+                localStorage.removeItem(
+                    CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID
+                );
+            }
         }
     }
 
