@@ -1,9 +1,9 @@
 // Konfigurace aplikace - MyConnectAI v3
-// Verze: 3.1 - S méně striktní validací API klíčů
+// Verze: 3.2 - S podporou všech providerů a individuálních Assistant ID
 
 const CONFIG = {
     // === ZÁKLADNÍ NASTAVENÍ ===
-    VERSION: "3.1",
+    VERSION: "3.2",
     LAST_UPDATE: new Date().toISOString(),
     
     // === DEBUG MODE ===
@@ -108,7 +108,7 @@ const CONFIG = {
     SYSTEM: {
         NAME: "MyConnectAI v3",
         DESCRIPTION: "Multi-Model AI Chat aplikace s podporou různých jazykových modelů",
-        VERSION: "3.1.0",
+        VERSION: "3.2.0",
         BUILD_DATE: "2024-12-06",
         AUTHOR: "MELIORO Systems",
         LICENSE: "Proprietary",
@@ -136,8 +136,12 @@ const CONFIG = {
             TOGETHER_KEY: "secure_together_key",
             COHERE_KEY: "secure_cohere_key",
             
-            // Model specific
-            OPENAI_ASSISTANT_ID: "openai_assistant_id",
+            // Model specific - OpenAI Assistant IDs (individuální pro každý model)
+            OPENAI_ASSISTANT_ID: "openai_assistant_id", // Původní sdílený (pro zpětnou kompatibilitu)
+            OPENAI_ASSISTANT_ID_GPT_3_5_TURBO: "openai_assistant_id_gpt_3_5_turbo",
+            OPENAI_ASSISTANT_ID_GPT_4: "openai_assistant_id_gpt_4",
+            OPENAI_ASSISTANT_ID_GPT_4_TURBO_PREVIEW: "openai_assistant_id_gpt_4_turbo_preview",
+            OPENAI_ASSISTANT_ID_GPT_4O_MINI: "openai_assistant_id_gpt_4o_mini",
             
             // Systémové
             DEVICE_KEY: "device_key", // Pro šifrování
@@ -171,7 +175,7 @@ const CONFIG = {
         // Maximální délka zprávy
         MAX_MESSAGE_LENGTH: 4000,
         
-        // Vzory pro validaci API klíčů - MÉNĚ STRIKTNÍ
+        // Vzory pro validaci API klíčů
         API_KEY_PATTERNS: {
             // OpenAI klíče mohou obsahovat písmena, číslice, pomlčky a podtržítka
             OPENAI: /^(sk-[a-zA-Z0-9_-]{20,}|sess-[a-zA-Z0-9_-]{20,})$/,
@@ -182,10 +186,14 @@ const CONFIG = {
             // Google klíče
             GOOGLE: /^AIza[a-zA-Z0-9_-]{20,}$/,
             
-            // nové
+            // Perplexity klíče
             PERPLEXITY: /^pplx-[a-zA-Z0-9_-]{20,}$/,
-            TOGETHER: /^[a-zA-Z0-9_-]{40,}$/,  // Together používá dlouhé klíče
-            COHERE: /^[a-zA-Z0-9_-]{30,}$/     // Cohere klíče
+            
+            // Together AI klíče (delší)
+            TOGETHER: /^[a-zA-Z0-9_-]{40,}$/,
+            
+            // Cohere klíče
+            COHERE: /^[a-zA-Z0-9_-]{30,}$/
         }
     },
     
