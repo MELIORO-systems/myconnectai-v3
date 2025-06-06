@@ -1,7 +1,7 @@
-// Hlavní aplikační logika - MyConnectAI v3.1
-// Verze: 3.1 - S optimalizovanou inicializací
+// Hlavní aplikační logika - MyConnectAI v3.2
+// Verze: 3.2 - Opravená inicializační sekvence a error handling
 
-const APP_VERSION = "3.1";
+const APP_VERSION = "3.2";
 
 // Globální proměnné
 let messages = [];
@@ -43,7 +43,8 @@ async function sendMessage() {
         return;
     }
     
-    const modelInfo = window.modelManager?.getModelInfo();
+    // Použít sync verzi pro rychlou kontrolu
+    const modelInfo = window.modelManager?.getModelInfoSync();
     if (!modelInfo?.hasApiKey) {
         if (window.uiManager) {
             window.uiManager.addMessage('error', 
@@ -163,50 +164,53 @@ function clearChat() {
 
 // Inicializace aplikace s lepší kontrolou závislostí
 async function initApp() {
-    console.log('🚀 Starting MyConnectAI v3.1...');
+    console.log('🚀 Starting MyConnectAI v3.2...');
     console.log('📌 App Version:', APP_VERSION);
     console.log('📌 Config Version:', CONFIG.VERSION);
     
     try {
-        // 1. Počkat na Security Manager
+        // 1. Počkat na Security Manager (první, protože na něm závisí ostatní)
         if (window.security && !window.security.initialized) {
             console.log('⏳ Waiting for Security Manager...');
             await window.security.waitForInit();
+            console.log('✅ Security Manager ready');
         }
         
-        // 2. Inicializovat Model Loader
-        if (window.modelLoader) {
-            console.log('⏳ Initializing Model Loader...');
-            await window.modelLoader.initialize();
-        }
-        
-        // 3. Inicializovat Model Manager
+        // 2. Inicializovat Model Manager (druhý, protože Model Loader ho potřebuje)
         if (window.modelManager) {
             console.log('⏳ Initializing Model Manager...');
             await window.modelManager.initialize();
-            
-            // Validovat konfiguraci
-            const issues = window.modelManager.validateConfiguration();
+            console.log('✅ Model Manager ready');
+        }
+        
+        // 3. Inicializovat Model Loader (třetí, po Model Manageru)
+        if (window.modelLoader) {
+            console.log('⏳ Initializing Model Loader...');
+            await window.modelLoader.initialize();
+            console.log('✅ Model Loader ready');
+        }
+        
+        // 4. Validovat konfiguraci
+        if (window.modelManager) {
+            const issues = await window.modelManager.validateConfiguration();
             if (issues.length > 0) {
                 console.warn('⚠️ Configuration issues:');
                 issues.forEach(issue => {
-                    if (typeof issue === 'string') {
-                        console.warn(`  - ${issue}`);
-                    } else {
-                        console.warn(`  - [${issue.type}] ${issue.message}`);
-                    }
+                    console.warn(`  - [${issue.type}] ${issue.message}`);
                 });
             }
             
             // Zobrazit dostupné modely
-            const models = window.modelManager.getAvailableModels();
+            const models = window.modelManager.getAvailableModelsSync();
             console.log('🤖 Available models:', models.length);
-            models.forEach(m => {
-                console.log(`  - ${m.name} (${m.id}) ${m.hasApiKey ? '✅' : '❌'}`);
-            });
+            if (CONFIG.DEBUG_MODE) {
+                models.forEach(m => {
+                    console.log(`  - ${m.name} (${m.id}) ${m.hasApiKey ? '✅' : '❌'}`);
+                });
+            }
             
             // Zobrazit aktivní model
-            const activeModel = window.modelManager.getModelInfo();
+            const activeModel = window.modelManager.getModelInfoSync();
             if (activeModel) {
                 console.log('✅ Active model:', activeModel.name);
             } else {
@@ -214,19 +218,36 @@ async function initApp() {
             }
         }
         
-        // 4. Debug mode
+        // 5. Debug mode
         if (CONFIG.DEBUG_MODE) {
             console.log('🐛 Debug mode is ON');
             window.debugInfo = {
                 app: window.chatSystem,
                 security: window.security,
                 modelManager: window.modelManager,
+                modelLoader: window.modelLoader,
                 uiManager: window.uiManager,
-                settingsManager: window.settingsManager
+                settingsManager: window.settingsManager,
+                // Debug funkce
+                getState: () => ({
+                    messages: messages.length,
+                    rateLimitCounter: rateLimitCounter,
+                    initialized: window.modelManager?.initialized,
+                    activeModel: window.modelManager?.getActiveModel()?.id,
+                    visibleModels: window.modelManager?.getAvailableModelsSync().length
+                }),
+                // Test funkce
+                testApiKeys: async () => {
+                    const providers = ['openai', 'anthropic', 'google'];
+                    for (const provider of providers) {
+                        const hasKey = await window.modelManager?.checkApiKey(provider);
+                        console.log(`${provider}: ${hasKey ? '✅ configured' : '❌ missing'}`);
+                    }
+                }
             };
         }
         
-        console.log('✅ MyConnectAI v3.1 ready');
+        console.log('✅ MyConnectAI v3.2 ready');
         
     } catch (error) {
         console.error('❌ Initialization failed:', error);
@@ -256,6 +277,7 @@ function waitForComponents() {
                 'CONFIG': window.CONFIG,
                 'Security': window.security,
                 'Models Registry': window.MODELS_REGISTRY,
+                'Models Registry Helper': window.ModelsRegistryHelper,
                 'OpenAI Model': window.OpenAIModel,
                 'Model Manager': window.modelManager,
                 'Model Loader': window.modelLoader,
@@ -350,4 +372,4 @@ window.chatSystem = {
 // Zachování kompatibility
 window.sendMessage = sendMessage;
 
-console.log('📦 Main.js loaded (MyConnectAI v3.1)');
+console.log('📦 Main.js loaded (MyConnectAI v3.2)');
