@@ -1,5 +1,5 @@
 /* MyConnectAI v3 - Kompletní styly */
-/* S původními výraznými barvami z melioro.online */
+/* Opravená verze s vylepšeními z melioro.online - všechna témata */
 
 * {
     margin: 0;
@@ -9,9 +9,9 @@
 
 /* === COLOR SCHEMES === */
 :root {
-    /* Claude (Default) - světlé béžové */
-    --primary-color: #D97757;
-    --primary-hover: #C96442;
+    /* Claude (Default) - teplejší béžové s výraznějšími kontrasty */
+    --primary-color: #E17B47;
+    --primary-hover: #D96A36;
     --secondary-color: #8B7355;
     --success-color: #52A373;
     --warning-color: #E5A50A;
@@ -23,14 +23,16 @@
     --text-primary: #2C2416;
     --text-secondary: #6B5D4F;
     --text-muted: #A09383;
-    --shadow-sm: 0 1px 2px 0 rgb(45 42 38 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(45 42 38 / 0.1), 0 1px 2px -1px rgb(45 42 38 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(45 42 38 / 0.1), 0 4px 6px -4px rgb(45 42 38 / 0.1);
+    --shadow-sm: 0 2px 4px -1px rgb(45 42 38 / 0.06), 0 1px 2px -1px rgb(45 42 38 / 0.03);
+    --shadow: 0 4px 6px -1px rgb(45 42 38 / 0.1), 0 2px 4px -2px rgb(45 42 38 / 0.06);
+    --shadow-md: 0 10px 15px -3px rgb(45 42 38 / 0.1), 0 4px 6px -4px rgb(45 42 38 / 0.05);
+    --shadow-lg: 0 20px 25px -5px rgb(45 42 38 / 0.1), 0 8px 10px -6px rgb(45 42 38 / 0.04);
+    --shadow-xl: 0 25px 50px -12px rgb(45 42 38 / 0.15);
     --radius: 0.5rem;
     --radius-lg: 0.75rem;
 }
 
-/* Google theme - čistě bílé */
+/* Google theme - čistější s Material Design vlivem */
 .theme-google {
     --primary-color: #1a73e8;
     --primary-hover: #1557b0;
@@ -39,21 +41,23 @@
     --warning-color: #f29900;
     --error-color: #d33b27;
     --background: #ffffff;
-    --surface: #f8f9fa;
-    --surface-hover: #f1f3f4;
-    --border: #dadce0;
+    --surface: #ffffff;
+    --surface-hover: #f8f9fa;
+    --border: #e8eaed;
     --text-primary: #202124;
     --text-secondary: #5f6368;
     --text-muted: #80868b;
     --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
     --shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
-    --shadow-lg: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+    --shadow-md: 0 2px 6px 2px rgba(60,64,67,0.15), 0 1px 2px 0 rgba(60,64,67,0.3);
+    --shadow-lg: 0 4px 16px 2px rgba(60,64,67,0.15), 0 1px 3px 0 rgba(60,64,67,0.3);
+    --shadow-xl: 0 8px 24px 4px rgba(60,64,67,0.15);
 }
 
-/* Replit theme - opravdu tmavé */
+/* Replit theme - tmavé s výraznější oranžovou */
 .theme-replit {
     --primary-color: #F26207;
-    --primary-hover: #E55100;
+    --primary-hover: #FF7A1F;
     --secondary-color: #6BB6FF;
     --success-color: #21C55E;
     --warning-color: #F59E0B;
@@ -65,12 +69,31 @@
     --text-primary: #F0F6FC;
     --text-secondary: #8B949E;
     --text-muted: #6E7681;
-    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.5);
-    --shadow: 0 1px 3px 0 rgba(0,0,0,0.7), 0 1px 2px -1px rgba(0,0,0,0.7);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -4px rgba(0,0,0,0.7);
+    --shadow-sm: 0 2px 4px 0 rgba(0,0,0,0.5);
+    --shadow: 0 4px 8px 0 rgba(0,0,0,0.7), 0 2px 4px -2px rgba(0,0,0,0.7);
+    --shadow-md: 0 8px 16px 0 rgba(0,0,0,0.7), 0 4px 8px -4px rgba(0,0,0,0.7);
+    --shadow-lg: 0 16px 32px -5px rgba(0,0,0,0.8), 0 8px 16px -8px rgba(0,0,0,0.7);
+    --shadow-xl: 0 24px 48px -12px rgba(0,0,0,0.9);
 }
 
-/* Carrd theme - neonové futuristické */
+/* Replit theme - speciální efekty */
+.theme-replit .primary-btn,
+.theme-replit .send-button,
+.theme-replit .save-button {
+    background: linear-gradient(135deg, #F26207 0%, #FF7A1F 100%);
+    box-shadow: 0 4px 20px rgba(242, 98, 7, 0.3);
+    transition: all 0.3s ease;
+}
+
+.theme-replit .primary-btn:hover,
+.theme-replit .send-button:hover,
+.theme-replit .save-button:hover {
+    background: linear-gradient(135deg, #FF7A1F 0%, #FF8F3D 100%);
+    box-shadow: 0 6px 30px rgba(242, 98, 7, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Carrd theme - neonové futuristické s duhovými efekty */
 .theme-carrd {
     --primary-color: #00D9FF;
     --primary-hover: #00B8E6;
@@ -87,23 +110,82 @@
     --text-muted: #666666;
     --shadow-sm: 0 2px 8px rgba(0, 217, 255, 0.2);
     --shadow: 0 4px 16px rgba(0, 217, 255, 0.3);
-    --shadow-lg: 0 8px 32px rgba(0, 217, 255, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 217, 255, 0.4);
+    --shadow-lg: 0 16px 48px rgba(0, 217, 255, 0.5);
+    --shadow-xl: 0 24px 64px rgba(0, 217, 255, 0.6);
     --radius: 0.75rem;
     --radius-lg: 1rem;
 }
 
-/* Carrd theme - speciální efekty */
+/* Carrd theme - duhové tlačítko Odeslat */
+.theme-carrd .send-button {
+    background: linear-gradient(45deg, #FF0080, #FF8C00, #FFD700, #00FF00, #00CED1, #0080FF, #8A2BE2, #FF0080);
+    background-size: 300% 300%;
+    animation: rainbow-gradient 3s ease infinite;
+    box-shadow: 0 4px 30px rgba(0, 217, 255, 0.5);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.theme-carrd .send-button:hover:not(:disabled) {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 40px rgba(0, 217, 255, 0.7), 0 0 20px rgba(255, 0, 128, 0.5);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+
+@keyframes rainbow-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Carrd theme - všechna ostatní tlačítka */
 .theme-carrd .primary-btn,
-.theme-carrd .send-button,
-.theme-carrd .save-button {
+.theme-carrd .save-button,
+.theme-carrd .action-button,
+.theme-carrd .action-btn {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
+    transition: all 0.3s ease;
 }
 
 .theme-carrd .primary-btn:hover,
-.theme-carrd .send-button:hover,
-.theme-carrd .save-button:hover {
-    box-shadow: 0 6px 30px rgba(0, 217, 255, 0.6);
+.theme-carrd .save-button:hover,
+.theme-carrd .action-button:hover,
+.theme-carrd .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(0, 217, 255, 0.6), 0 0 15px rgba(255, 0, 128, 0.3);
+}
+
+/* Carrd theme - input efekty */
+.theme-carrd input:focus,
+.theme-carrd textarea:focus,
+.theme-carrd select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+/* Carrd theme - zprávy */
+.theme-carrd .message {
+    transition: all 0.3s ease;
+}
+
+.theme-carrd .user-message {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #CC0066 100%);
+    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.3);
+}
+
+.theme-carrd .assistant-message {
+    background: var(--surface);
+    border: 1px solid rgba(0, 217, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
+}
+
+.theme-carrd .message:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 25px rgba(0, 217, 255, 0.4);
 }
 
 body {
@@ -132,6 +214,12 @@ body {
     border: 1px solid var(--border);
 }
 
+/* Google theme - bez borderu pro čistší vzhled */
+.theme-google .chat-container {
+    border: none;
+    box-shadow: var(--shadow-xl);
+}
+
 /* === HEADER === */
 .chat-header {
     background: var(--surface);
@@ -142,7 +230,7 @@ body {
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
     min-height: 80px;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .header-content {
@@ -162,17 +250,19 @@ body {
 .header-logo-link {
     color: var(--text-primary);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .header-logo-link:hover {
     color: var(--primary-color);
+    transform: translateX(2px);
 }
 
 .header-subtitle {
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .header-buttons {
@@ -191,7 +281,7 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     box-shadow: var(--shadow-sm);
 }
@@ -199,8 +289,18 @@ body {
 .action-button:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Google theme - Material Design tlačítka */
+.theme-google .action-button {
+    border: none;
     box-shadow: var(--shadow);
+}
+
+.theme-google .action-button:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .action-button:active {
@@ -225,6 +325,18 @@ body {
     border: 1px solid var(--border);
     margin-top: 0.5rem;
     overflow: hidden;
+    animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-content.show {
@@ -236,7 +348,7 @@ body {
     padding: 0.875rem 1.25rem;
     text-decoration: none;
     display: block;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
     border-bottom: 1px solid var(--border);
 }
 
@@ -246,6 +358,7 @@ body {
 
 .dropdown-content a:hover {
     background: var(--surface-hover);
+    padding-left: 1.5rem;
 }
 
 /* === MODAL === */
@@ -261,6 +374,7 @@ body {
     justify-content: center;
     align-items: center;
     animation: fadeIn 0.2s ease;
+    backdrop-filter: blur(4px);
 }
 
 .theme-replit .modal,
@@ -276,23 +390,23 @@ body {
 .modal-content {
     background: var(--background);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-xl);
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: slideIn 0.3s ease;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes slideIn {
     from {
-        transform: translateY(-20px);
+        transform: translateY(-20px) scale(0.95);
         opacity: 0;
     }
     to {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
     }
 }
@@ -310,6 +424,7 @@ body {
     margin: 0;
     font-size: 1.25rem;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
 .close-button {
@@ -326,6 +441,7 @@ body {
 .close-button:hover {
     background: var(--surface-hover);
     color: var(--text-primary);
+    transform: rotate(90deg);
 }
 
 .modal-body {
@@ -358,12 +474,13 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .cancel-button:hover {
     background: var(--surface-hover);
     border-color: var(--text-secondary);
+    transform: translateY(-1px);
 }
 
 /* === SETTINGS SECTIONS === */
@@ -373,9 +490,11 @@ body {
     border-radius: var(--radius);
     padding: 1.5rem;
     border: 1px solid var(--border);
+    transition: all 0.3s ease;
 }
 
-.settings-section:last-child {
+/* OPRAVA: Poslední settings-section bez dolní mezery */
+.modal-body .settings-section:last-child {
     margin-bottom: 0;
 }
 
@@ -384,15 +503,21 @@ body {
     font-size: 1.1rem;
     color: var(--text-primary);
     font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
-/* Provider sections - už mají vlastní styl, jen upravíme */
+/* Provider sections */
 .provider-section {
     background: var(--surface);
     border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     border: 1px solid var(--border);
+}
+
+/* OPRAVA: Poslední provider-section bez dolní mezery */
+#providers-settings .provider-section:last-child {
+    margin-bottom: 0;
 }
 
 .provider-section h3 {
@@ -452,12 +577,17 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .settings-select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
+}
+
+.theme-google .settings-select:focus {
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
 }
 
 .theme-carrd .settings-select:focus {
@@ -493,22 +623,24 @@ body {
     border-radius: 50%;
     border: 2px solid var(--border);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
 .theme-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
     border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
 }
 
 .theme-btn.active {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.15);
+    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.2);
+    transform: scale(1.1);
 }
 
 .theme-claude {
-    background: linear-gradient(135deg, #FBF9F4 0%, #D97757 100%);
+    background: linear-gradient(135deg, #FBF9F4 0%, #E17B47 100%);
 }
 
 .theme-google {
@@ -520,7 +652,7 @@ body {
 }
 
 .theme-carrd {
-    background: linear-gradient(135deg, #000000 0%, #00D9FF 100%);
+    background: linear-gradient(135deg, #000000 0%, #00D9FF 50%, #FF0080 100%);
 }
 
 /* API Key Inputs */
@@ -553,18 +685,24 @@ body {
     background: var(--background);
     color: var(--text-primary);
     font-size: 0.875rem;
+    transition: all 0.3s ease;
 }
 
 .api-key-input:focus,
 .settings-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
+}
+
+.theme-google .api-key-input:focus,
+.theme-google .settings-input:focus {
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
 }
 
 .theme-carrd .api-key-input:focus,
 .theme-carrd .settings-input:focus {
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
 }
 
 .toggle-btn,
@@ -576,7 +714,7 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     white-space: nowrap;
 }
 
@@ -584,6 +722,8 @@ body {
 .test-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
 }
 
 .api-key-group small {
@@ -616,14 +756,15 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     white-space: nowrap;
 }
 
 .action-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 /* Save Button */
@@ -636,13 +777,14 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
 }
 
 .save-button:hover {
     background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .save-button.has-changes {
@@ -650,9 +792,9 @@ body {
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(201, 100, 66, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(201, 100, 66, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(201, 100, 66, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(225, 123, 71, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(225, 123, 71, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(225, 123, 71, 0); }
 }
 
 /* Settings Status */
@@ -696,17 +838,18 @@ body {
     line-height: 1.6;
     font-size: 0.925rem;
     box-shadow: var(--shadow-sm);
-    animation: messageSlideIn 0.3s ease;
+    animation: messageSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s ease;
 }
 
 @keyframes messageSlideIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(15px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -727,15 +870,27 @@ body {
     border: 1px solid var(--border);
 }
 
+/* Google theme - čistější zprávy */
+.theme-google .assistant-message {
+    border: none;
+    box-shadow: var(--shadow);
+}
+
+/* Hover efekty pro světlá témata */
+.message:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
 .system-message {
-    background: rgba(201, 100, 66, 0.1);
+    background: rgba(225, 123, 71, 0.1);
     color: var(--primary-color);
     margin: 1rem auto;
     text-align: center;
     width: fit-content;
     max-width: 95%;
     font-style: italic;
-    border: 1px solid rgba(201, 100, 66, 0.2);
+    border: 1px solid rgba(225, 123, 71, 0.2);
 }
 
 .theme-carrd .system-message {
@@ -764,6 +919,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 400px;
+    animation: fadeIn 0.5s ease;
 }
 
 .welcome-content {
@@ -775,6 +931,7 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
 }
 
 .welcome-subtitle {
@@ -798,7 +955,7 @@ body {
     border-radius: var(--radius);
     padding: 1rem 1.25rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: left;
     font-size: 0.875rem;
     color: var(--text-primary);
@@ -815,7 +972,7 @@ body {
     height: 2px;
     background: var(--primary-color);
     transform: scaleX(0);
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
 }
 
 .example-query:hover::before {
@@ -825,8 +982,8 @@ body {
 .example-query:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
 
 /* === CHAT INPUT === */
@@ -848,7 +1005,7 @@ body {
     resize: none;
     outline: none;
     background: var(--background);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, height 0.1s ease;
+    transition: all 0.3s ease;
     font-family: inherit;
     line-height: 1.6;
     min-height: 2.75rem;
@@ -860,11 +1017,16 @@ body {
 
 .chat-input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
+    transform: translateY(-1px);
+}
+
+.theme-google .chat-input:focus {
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
 }
 
 .theme-carrd .chat-input:focus {
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
 }
 
 .chat-input::placeholder {
@@ -880,14 +1042,15 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    box-shadow: var(--shadow);
 }
 
 .send-button:hover:not(:disabled) {
     background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .send-button:disabled {
@@ -927,7 +1090,7 @@ body {
 .footer-link {
     color: var(--primary-color);
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .footer-link:hover {
@@ -1236,13 +1399,9 @@ body {
     background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 217, 255, 0.05) 100%);
 }
 
-.theme-carrd .message:hover {
-    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.2);
-}
-
-.theme-carrd .action-button:hover,
-.theme-carrd .example-query:hover {
-    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+.theme-carrd .action-button:active,
+.theme-carrd .send-button:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 /* === LOADING ANIMATION === */
