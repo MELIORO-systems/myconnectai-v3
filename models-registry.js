@@ -1,5 +1,5 @@
 // Models Registry - Centrální definice všech AI modelů
-// Verze: 2.0 - S přidanými Perplexity, Together AI a Cohere modely
+// Verze: 2.1 - Všechny OpenAI modely enabled a visible
 // 
 // Tento soubor obsahuje definice VŠECH dostupných modelů.
 // Pro přidání nového modelu stačí přidat nový objekt do pole MODELS_REGISTRY.
@@ -27,8 +27,8 @@ const MODELS_REGISTRY = [
         id: "gpt-4",
         provider: "openai",
         name: "GPT-4",
-        enabled: true,
-        visible: true,
+        enabled: true,  // ZMĚNĚNO NA TRUE
+        visible: true,  // ZMĚNĚNO NA TRUE
         config: {
             model: "gpt-4",
             contextWindow: 8192,
@@ -37,15 +37,15 @@ const MODELS_REGISTRY = [
             capabilities: ["chat", "analysis", "reasoning", "coding"],
             description: "Nejvýkonnější model pro komplexní úlohy",
             endpoint: "https://api.openai.com/v1/chat/completions",
-            assistant: false
+            assistant: true  // ZMĚNĚNO NA TRUE
         }
     },
     {
         id: "gpt-4-turbo-preview",
         provider: "openai",
         name: "GPT-4 Turbo",
-        enabled: true,
-        visible: true,
+        enabled: true,  // ZMĚNĚNO NA TRUE
+        visible: true,  // ZMĚNĚNO NA TRUE
         config: {
             model: "gpt-4-turbo-preview",
             contextWindow: 128000,
@@ -54,7 +54,7 @@ const MODELS_REGISTRY = [
             capabilities: ["chat", "analysis", "reasoning", "coding", "vision"],
             description: "Rychlejší verze GPT-4 s větším kontextem",
             endpoint: "https://api.openai.com/v1/chat/completions",
-            assistant: false
+            assistant: true  // ZMĚNĚNO NA TRUE
         }
     },
     {
