@@ -2,15 +2,16 @@
 
 ## 📋 Přehled
 
-MyConnectAI v3 je webová aplikace pro chat s různými AI modely (OpenAI, Anthropic, Google) přes jednotné rozhraní. Aplikace běží kompletně v prohlížeči bez backend serveru a používá přímá API volání.
+MyConnectAI v3 je webová aplikace pro chat s různými AI modely přes jednotné rozhraní. Aplikace běží kompletně v prohlížeči bez backend serveru a používá přímá API volání. Aktuálně podporuje OpenAI modely s připravenou architekturou pro budoucí rozšíření o Anthropic a Google modely.
 
 ### Hlavní vlastnosti:
-- 🤖 **Multi-model podpora** - GPT-3.5, GPT-4, Claude, Gemini a další
-- 🔐 **Lokální šifrování** - API klíče jsou šifrovány pomocí AES-GCM
+- 🤖 **Multi-model architektura** - Aktuálně GPT-3.5 Turbo a GPT-4o Mini
+- 🔐 **Lokální šifrování** - API klíče jsou šifrovány pomocí AES-256-GCM
 - 🎨 **4 barevná témata** - Claude, Google, Replit, Carrd
-- 📦 **Export/Import** konfigurace s heslem
+- 📦 **Export/Import** konfigurace s heslem (PBKDF2)
 - 🔄 **Automatické přepínání** mezi modely
 - 📱 **Responzivní design** - funguje na mobilu i desktopu
+- 🔒 **Bezpečný** - žádná data neopouštějí prohlížeč
 
 ## 🏗️ Struktura projektu
 
@@ -18,37 +19,39 @@ MyConnectAI v3 je webová aplikace pro chat s různými AI modely (OpenAI, Anthr
 myconnectai-v3/
 ├── index.html              # Hlavní HTML soubor
 ├── style.css               # Všechny styly aplikace
-├── config.js               # Centrální konfigurace
+├── config.js               # Centrální konfigurace (v3.1)
 ├── security.js             # Šifrování a bezpečnost (AES-GCM)
 ├── models-registry.js      # Definice všech AI modelů
-├── model-manager.js        # Správa modelů a API volání
-├── model-loader.js         # Automatické načítání modelů
-├── model-openai.js         # Implementace OpenAI API
-├── ui-manager.js           # Správa uživatelského rozhraní
-├── settings-manager.js     # Správa nastavení aplikace
-└── main.js                 # Hlavní aplikační logika
+├── model-manager.js        # Správa modelů a API volání (v3.0)
+├── model-loader.js         # Automatické načítání modelů (v2.0)
+├── model-openai.js         # Implementace OpenAI API (v3.0)
+├── ui-manager.js           # Správa uživatelského rozhraní (v3.0)
+├── settings-manager.js     # Správa nastavení aplikace (v2.0)
+└── main.js                 # Hlavní aplikační logika (v3.2)
 ```
 
 ## 🚀 Jak aplikace funguje
 
 ### 1. Inicializační proces
 1. **config.js** - Načte konfiguraci
-2. **security.js** - Inicializuje šifrování
+2. **security.js** - Inicializuje šifrování (kontroluje localStorage a Web Crypto API)
 3. **models-registry.js** - Definuje dostupné modely
-4. **model-loader.js** - Načte enabled modely
-5. **model-manager.js** - Připraví modely k použití
-6. **ui-manager.js** - Nastaví UI a téma
-7. **main.js** - Spustí aplikaci
+4. **ui-manager.js** - Inicializuje UI při DOMContentLoaded
+5. **main.js** - Při window.load spustí hlavní inicializaci:
+   - Security Manager (čeká na dokončení)
+   - Model Loader (načte enabled modely)
+   - Model Manager (inicializuje s načtenými modely)
 
 ### 2. Flow dat
 ```
-Uživatel → UI Manager → Model Manager → Konkrétní Model → API → Odpověď
+Uživatel → UI Manager → Model Manager → OpenAI Model → API → Odpověď
 ```
 
 ### 3. Bezpečnost
-- API klíče jsou šifrovány pomocí AES-GCM
+- API klíče jsou šifrovány pomocí AES-256-GCM
 - Každé zařízení má unikátní šifrovací klíč
-- Export dat je chráněn heslem (PBKDF2)
+- Export dat je chráněn heslem (PBKDF2 s 100,000 iteracemi)
+- Validace síly hesla při exportu
 
 ## ⚙️ Konfigurace
 
@@ -57,7 +60,7 @@ Uživatel → UI Manager → Model Manager → Konkrétní Model → API → Odp
 ```javascript
 const CONFIG = {
     // Verze aplikace
-    VERSION: "3.0",
+    VERSION: "3.1",
     
     // Debug režim - vypíše detailní logy
     DEBUG_MODE: false,
@@ -75,279 +78,151 @@ const CONFIG = {
             "Vysvětli mi, jak funguje kvantový počítač",
             // ...
         ]
-    },
-    
-    // Storage klíče
-    STORAGE: {
-        PREFIX: "myconnectai_",
-        KEYS: {
-            OPENAI_KEY: "secure_openai_key",
-            ANTHROPIC_KEY: "secure_anthropic_key",
-            GOOGLE_KEY: "secure_google_key",
-            // ...
-        }
     }
 };
 ```
 
-## 🤖 Přidání nového AI modelu
+## 🤖 Aktuálně podporované modely
+
+### OpenAI (funkční)
+- **GPT-3.5 Turbo** - Rychlý model pro běžné úlohy
+- **GPT-4o Mini** - Optimalizovaná verze GPT-4 (výchozí)
+
+### Připraveno pro budoucí rozšíření
+- **Anthropic** (Claude modely) - struktura připravena, chybí implementace
+- **Google** (Gemini modely) - struktura připravena, chybí implementace
+
+## 🔧 Přidání nového AI modelu
 
 ### Krok 1: Přidat model do `models-registry.js`
 
 ```javascript
 {
-    id: "claude-3-opus-20240229",
-    provider: "anthropic",
-    name: "Claude 3 Opus",
-    enabled: true,        // true = model je dostupný
-    visible: false,       // true = model je viditelný ve výběru
+    id: "gpt-4",
+    provider: "openai",
+    name: "GPT-4",
+    enabled: true,        // true = model má implementaci a bude se načítat
+    visible: true,        // true = model je viditelný ve výběru
     config: {
-        model: "claude-3-opus-20240229",
-        contextWindow: 200000,
+        model: "gpt-4",
+        contextWindow: 8192,
         maxTokens: 4096,
         temperature: 0.7,
-        capabilities: ["chat", "analysis", "reasoning", "coding", "vision"],
-        description: "Nejvýkonnější model od Anthropic",
-        endpoint: "https://api.anthropic.com/v1/messages",
-        assistant: false   // true = zobrazí Assistant ID nastavení (pouze OpenAI)
+        capabilities: ["chat", "analysis", "reasoning", "coding"],
+        description: "Nejvýkonnější model pro komplexní úlohy",
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        assistant: false   // true = zobrazí Assistant ID nastavení (pouze některé OpenAI modely)
     }
 }
 ```
 
-### Krok 2: Vytvořit implementační soubor `model-anthropic.js`
+### Krok 2: Pro nového providera vytvořit implementační soubor
 
+Například `model-anthropic.js`:
 ```javascript
 class AnthropicModel {
     constructor(modelId, modelDef) {
         this.id = modelId;
         this.provider = 'anthropic';
         this.name = modelDef.name;
-        this.visible = modelDef.visible || false;
-        this.config = modelDef.config || {};
-        // ... další vlastnosti
+        // ...
     }
 
     async sendMessage(messages, options = {}) {
-        const apiKey = options.apiKey || await window.modelManager?.getApiKey('anthropic');
-        
-        if (!apiKey) {
-            throw new window.ConfigurationError('Anthropic API key not configured', 'NO_API_KEY');
-        }
-
         // Implementace API volání
-        const response = await fetch(this.config.endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: this.config.model,
-                messages: messages,
-                max_tokens: options.maxTokens || this.config.maxTokens
-            })
-        });
-
-        // Zpracování odpovědi
-        const data = await response.json();
-        return data.content[0].text;
     }
 }
 
 window.AnthropicModel = AnthropicModel;
 ```
 
-### Krok 3: Přidat do `index.html`
-
-```html
-<!-- Model implementace -->
-<script src="model-openai.js"></script>
-<script src="model-anthropic.js"></script>  <!-- Nový model -->
-```
-
-### Krok 4: Upravit `model-loader.js` (pokud je potřeba)
-
-```javascript
-case 'anthropic':
-    if (window.AnthropicModel) {
-        return new AnthropicModel(modelDef.id, modelDef);
-    }
-    break;
-```
+### Krok 3: Přidat do `index.html` a `model-loader.js`
 
 ## 🎨 Témata
 
-Aplikace má 4 barevná témata definovaná v `style.css`:
+Aplikace má 4 barevná témata:
 
-1. **Claude** (výchozí) - světlé oranžové téma
-2. **Google** - modro-bílé téma
-3. **Replit** - tmavé červené téma
-4. **Carrd** - tmavé cyan téma
+1. **Claude** (výchozí) - světlé béžové téma
+2. **Google** - čistě bílé s modrými akcenty
+3. **Replit** - tmavé téma s červenými akcenty
+4. **Carrd** - tmavé s cyan akcenty
 
-### Přidání nového tématu:
+## 💾 Použití aplikace
 
-1. Přidat CSS variables do `style.css`:
-```css
-.theme-mynew {
-    --primary-color: #your-color;
-    --background: #your-background;
-    /* ... další barvy ... */
-}
-```
+### První spuštění
+1. Otevřete `index.html` v prohlížeči
+2. Klikněte na Menu → Nastavení
+3. Zadejte váš OpenAI API klíč
+4. Klikněte Uložit
 
-2. Přidat tlačítko do `index.html`:
-```html
-<button class="theme-btn theme-mynew" data-theme="mynew" title="Moje téma"></button>
-```
+### Posílání zpráv
+1. Napište zprávu do textového pole
+2. Stiskněte Enter nebo klikněte Odeslat
+3. Počkejte na odpověď AI
 
-## 📁 Hierarchická nastavení
-
-Nastavení jsou organizována hierarchicky podle providerů a modelů:
-
-```
-Nastavení
-├── AI Model (výběr aktivního modelu)
-├── Vzhled (výběr tématu)
-├── OpenAI (zobrazí se pouze pokud jsou enabled OpenAI modely)
-│   ├── API Key
-│   ├── Security info s odkazem na detaily
-│   └── Model-specific nastavení
-│       └── Assistant ID (pouze pro modely s assistant: true)
-├── Anthropic (pouze pro enabled Anthropic modely)
-│   └── API Key
-└── Google (pouze pro enabled Google modely)
-    └── API Key
-```
-
-### Model-specific parametry v config:
-
-```javascript
-config: {
-    // ... ostatní nastavení ...
-    assistant: true,   // Zobrazí pole pro Assistant ID (OpenAI)
-    // Budoucí rozšíření:
-    vision: true,      // Pro podporu obrázků
-    plugins: false,    // Pro podporu pluginů
-    streaming: true    // Pro streaming odpovědí
-}
-```
-
-### Přidání nového nastavení pro model:
-
-V `settings-manager.js` metodě `createModelSettings()`:
-
-```javascript
-// Příklad pro vision mode
-if (modelDef.config?.vision === true) {
-    // Přidat UI pro vision nastavení
-    group.innerHTML += `
-        <div class="setting-item">
-            <label>
-                <input type="checkbox" id="${modelDef.id}-vision-enabled">
-                Povolit Vision mode
-            </label>
-        </div>
-    `;
-}
-```
+### Export/Import konfigurace
+1. V nastavení klikněte na "Export nastavení"
+2. Zadejte heslo (min. 8 znaků, 3 typy znaků)
+3. Soubor se automaticky stáhne
+4. Pro import použijte "Import nastavení" a stejné heslo
 
 ## 🔒 Bezpečnost
 
 ### Šifrování dat
 - **Algoritmus**: AES-GCM 256-bit
-- **Klíč**: Unikátní pro každé zařízení
-- **IV**: Náhodný pro každé šifrování
+- **Klíč**: Unikátní pro každé zařízení (generován při prvním spuštění)
+- **IV**: Náhodný pro každé šifrování (12 bytů)
 
 ### API klíče
 - Nikdy nejsou poslány nikam jinam než přímo na API endpoint
 - Jsou šifrovány v localStorage
-- Při exportu jsou dodatečně šifrovány heslem
-- V nastavení je informační panel vysvětlující zabezpečení
+- Při exportu jsou dodatečně šifrovány heslem uživatele
 
-### Export/Import
-- Používá PBKDF2 pro odvození klíče z hesla
-- 100,000 iterací
-- Salt je součástí exportu
+### Validace
+- API klíče jsou validovány pomocí regex (podporují `-` a `_`)
+- Hesla pro export musí splňovat bezpečnostní požadavky
+- Všechny vstupy jsou escapovány proti XSS
 
-### Informace o zabezpečení pro uživatele
-Aplikace obsahuje informační panel v nastavení, který uživatelům vysvětluje:
-- Lokální ukládání dat
-- Šifrování AES-256
-- Přímou komunikaci s AI službami
-- Že nesbíráme žádná data
+## 🛠️ Řešení problémů
 
-## 🛠️ Údržba a debugging
+### "No visible models available"
+- Aplikace nenašla žádné modely k načtení
+- Zkontrolujte, zda jsou v `models-registry.js` modely s `enabled: true`
 
-### Debug mode
-V `config.js` nastavit:
+### "Neplatný formát API klíče"
+- OpenAI klíče musí začínat `sk-` nebo `sess-`
+- Mohou obsahovat písmena, číslice, pomlčky a podtržítka
+
+### Aplikace se nenačte
+1. Zkontrolujte konzoli prohlížeče (F12)
+2. Ověřte, že prohlížeč podporuje localStorage a Web Crypto API
+3. Vyčistěte cache a zkuste znovu
+
+## 📊 Známé limitace
+
+- Pouze OpenAI modely jsou aktuálně implementovány
+- Maximum 20 zpráv za minutu (rate limiting)
+- Maximální délka zprávy 4000 znaků
+- Timeout pro API volání 30 sekund
+
+## 🔧 Debug režim
+
+Pro detailní logování v `config.js` nastavte:
 ```javascript
 DEBUG_MODE: true
 ```
 
-Vypíše do konzole:
-- Všechny načtené modely
-- API volání
-- Inicializační proces
-- Chyby s detaily
-
-### Časté problémy
-
-1. **"No API key configured"**
-   - Řešení: Nastavit API klíč v nastavení
-
-2. **"Model not visible"**
-   - Řešení: V models-registry.js nastavit `visible: true`
-
-3. **"Initialization timeout"**
-   - Řešení: Vyčistit localStorage a obnovit stránku
-
-### Vyčištění dat
+V konzoli pak můžete použít:
 ```javascript
-// V konzoli prohlížeče:
-localStorage.clear();
-location.reload();
+window.debugInfo.testApiKeys()  // Test všech API klíčů
+window.debugInfo.getState()     // Stav aplikace
 ```
-
-## 📝 Důležité soubory pro úpravy
-
-### Změna vzhledu
-- `style.css` - všechny styly
-- `index.html` - struktura UI
-
-### Přidání modelů
-- `models-registry.js` - definice modelů
-- `model-*.js` - implementace API
-
-### Změna chování
-- `config.js` - základní nastavení
-- `main.js` - hlavní logika
-- `ui-manager.js` - UI interakce
-
-### Nastavení
-- `settings-manager.js` - logika nastavení
-- `security.js` - šifrování
-
-## 🔄 Verzování
-
-Aplikace má 3 úrovně verzí:
-1. **APP_VERSION** v `main.js` - verze aplikace
-2. **CONFIG.VERSION** - verze konfigurace
-3. **CONFIG.EXPORT.FORMAT_VERSION** - verze export formátu
 
 ## 📞 Podpora
 
 - **Email**: support@melioro.cz
 - **Web**: http://melioro.cz
-- **Dokumentace**: https://docs.melioro.cz/myconnectai
-
-## 🚧 Budoucí rozšíření
-
-1. **Další modely**: Claude, Gemini implementace
-2. **Statistiky**: Počet zpráv, tokenů, cena
-3. **Historie**: Ukládání a načítání konverzací
-4. **Pokročilé features**: Streaming, voice input, image upload
-5. **Plugins**: Rozšiřitelnost třetími stranami
+- **Verze**: 3.2
 
 ---
 
