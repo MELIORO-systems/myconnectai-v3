@@ -239,6 +239,9 @@ class SettingsManager {
             const group = document.createElement('div');
             group.className = 'model-settings-group';
             
+            // Použít unikátní ID s model ID
+            const inputId = `${modelDef.id}-assistant-id`;
+            
             // Načíst uloženou hodnotu
             const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID) || '';
             
@@ -246,14 +249,14 @@ class SettingsManager {
                 <h4>${modelDef.name} - Speciální nastavení</h4>
                 <div class="setting-item">
                     <label>OpenAI Assistant ID (pro Agent mode)</label>
-                    <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input" value="${savedId}">
+                    <input type="text" id="${inputId}" placeholder="asst_..." class="settings-input" value="${savedId}">
                     <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
                 </div>
             `;
             
             // Použít MutationObserver místo setTimeout pro spolehlivé připojení event listeneru
             const setupListener = () => {
-                const input = document.getElementById('openai-assistant-id');
+                const input = document.getElementById(inputId);
                 if (input) {
                     this.addEventListener(input, 'change', () => this.markAsChanged());
                     return true;
@@ -306,7 +309,16 @@ class SettingsManager {
     getEnabledProviders() {
         const enabledProviders = new Set();
         
-        if (window.ModelsRegistryHelper) {
+        // Získat pouze providery, kteří mají skutečně načtené modely
+        if (window.modelManager) {
+            const allModels = window.modelManager.getAllModels();
+            allModels.forEach(model => {
+                if (model.provider) {
+                    enabledProviders.add(model.provider);
+                }
+            });
+        } else if (window.ModelsRegistryHelper) {
+            // Fallback na registry pokud model manager není ready
             const enabledModels = window.ModelsRegistryHelper.getEnabledModels();
             console.log('Enabled models from registry:', enabledModels);
             
@@ -315,17 +327,6 @@ class SettingsManager {
                     enabledProviders.add(model.provider);
                 }
             });
-        } else {
-            console.warn('ModelsRegistryHelper not available, using model manager');
-            // Fallback - použít model manager
-            if (window.modelManager) {
-                const allModels = window.modelManager.getAllModels();
-                allModels.forEach(model => {
-                    if (model.provider) {
-                        enabledProviders.add(model.provider);
-                    }
-                });
-            }
         }
         
         const result = Array.from(enabledProviders);
@@ -656,10 +657,13 @@ class SettingsManager {
 
     // Uložit specifická nastavení modelů
     saveModelSpecificSettings() {
-        // OpenAI Assistant ID
-        const assistantIdInput = document.getElementById('openai-assistant-id');
-        if (assistantIdInput) {
-            const value = assistantIdInput.value.trim();
+        // OpenAI Assistant ID - hledat všechny možné assistant ID inputy
+        const assistantInputs = document.querySelectorAll('input[id$="-assistant-id"]');
+        
+        if (assistantInputs.length > 0) {
+            // Vzít hodnotu z prvního nalezeného inputu (všechny by měly mít stejnou hodnotu)
+            const value = assistantInputs[0].value.trim();
+            
             if (value) {
                 localStorage.setItem(
                     CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID,
