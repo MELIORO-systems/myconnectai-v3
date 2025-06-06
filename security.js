@@ -7,6 +7,7 @@ class SecurityManager {
         this.deviceKey = null;
         this.cryptoKey = null;
         this.initialized = false;
+        this.initFailed = false;  // Přidáno pro tracking selhání
         console.log('🔐 Security Manager initializing...');
         this.initialize();
     }
@@ -30,6 +31,7 @@ class SecurityManager {
         } catch (error) {
             console.error('🔐 Security Manager initialization failed:', error);
             this.initialized = false;
+            this.initFailed = true;  // Označit selhání
             throw error;
         }
     }
@@ -106,9 +108,20 @@ class SecurityManager {
     async waitForInit() {
         if (this.initialized) return;
         
+        // Pokud už inicializace selhala, vyhodit chybu okamžitě
+        if (this.initFailed) {
+            throw new Error('Security initialization failed');
+        }
+        
         // Počkat max 5 sekund
         for (let i = 0; i < 50; i++) {
             if (this.initialized) return;
+            
+            // Kontrola selhání během čekání
+            if (this.initFailed) {
+                throw new Error('Security initialization failed');
+            }
+            
             await new Promise(resolve => setTimeout(resolve, 100));
         }
         throw new Error('Security Manager initialization timeout');
