@@ -9,6 +9,8 @@ class UIManager {
         this.menuOpen = false;
         this.aboutModal = null;
         this.securityModal = null;
+        this.resizeTimer = null;
+        this.eventHandlers = null;
     }
 
     // Inicializace UI
@@ -435,47 +437,56 @@ class UIManager {
     // === EVENT LISTENERS ===
     
     setupEventListeners() {
-        // Zavřít menu při kliknutí mimo
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown') && this.menuOpen) {
-                this.closeMenu();
-            }
-        });
-        
-        // Zavřít modaly při kliknutí na pozadí
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                if (e.target.id === 'about-modal') {
-                    this.closeAbout();
-                }
-            }
-        });
-        
-        // Klávesové zkratky
-        document.addEventListener('keydown', (e) => {
-            // Ctrl + / pro otevření nastavení
-            if (e.ctrlKey && e.key === '/') {
-                e.preventDefault();
-                if (window.settingsManager) {
-                    window.settingsManager.open();
-                }
-            }
-            
-            // Escape pro zavření modalů
-            if (e.key === 'Escape') {
-                if (this.aboutModal) {
-                    this.closeAbout();
-                }
-                if (this.menuOpen) {
+        // Uložit reference na event handlery pro pozdější cleanup
+        this.eventHandlers = {
+            documentClick: (e) => {
+                if (!e.target.closest('.dropdown') && this.menuOpen) {
                     this.closeMenu();
                 }
+                if (e.target.classList.contains('modal')) {
+                    if (e.target.id === 'about-modal') {
+                        this.closeAbout();
+                    }
+                }
+            },
+            keydown: (e) => {
+                // Ctrl + / pro otevření nastavení
+                if (e.ctrlKey && e.key === '/') {
+                    e.preventDefault();
+                    if (window.settingsManager) {
+                        window.settingsManager.open();
+                    }
+                }
+                
+                // Escape pro zavření modalů
+                if (e.key === 'Escape') {
+                    if (this.aboutModal) {
+                        this.closeAbout();
+                    }
+                    if (this.menuOpen) {
+                        this.closeMenu();
+                    }
+                }
+            },
+            resize: () => {
+                clearTimeout(this.resizeTimer);
+                this.resizeTimer = setTimeout(() => {
+                    if (this.menuOpen && window.innerWidth > 768) {
+                        this.closeMenu();
+                    }
+                }, 250);
             }
-        });
+        };
+        
+        // Přidat event listenery
+        document.addEventListener('click', this.eventHandlers.documentClick);
+        document.addEventListener('keydown', this.eventHandlers.keydown);
+        window.addEventListener('resize', this.eventHandlers.resize);
         
         // Auto-resize pro textarea
         const chatInput = document.getElementById('chat-input');
         if (chatInput) {
-            chatInput.addEventListener('input', function() {
+            this.eventHandlers.chatInputInput = function() {
                 this.style.height = 'auto';
                 const scrollHeight = this.scrollHeight;
                 const lineHeight = parseInt(window.getComputedStyle(this).lineHeight);
@@ -488,29 +499,20 @@ class UIManager {
                     this.style.height = maxHeight + 'px';
                     this.style.overflowY = 'auto';
                 }
-            });
+            };
             
-            // Enter key handling
-            chatInput.addEventListener('keydown', function(event) {
+            this.eventHandlers.chatInputKeydown = function(event) {
                 if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
                     if (window.sendMessage && typeof window.sendMessage === 'function') {
                         window.sendMessage();
                     }
                 }
-            });
+            };
+            
+            chatInput.addEventListener('input', this.eventHandlers.chatInputInput);
+            chatInput.addEventListener('keydown', this.eventHandlers.chatInputKeydown);
         }
-        
-        // Responsivní menu - zavřít při resize
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (this.menuOpen && window.innerWidth > 768) {
-                    this.closeMenu();
-                }
-            }, 250);
-        });
     }
     
     // Cleanup metoda
@@ -519,10 +521,30 @@ class UIManager {
         this.closeAbout();
         this.closeMenu();
         
+        // Odstranit event listenery
+        if (this.eventHandlers) {
+            document.removeEventListener('click', this.eventHandlers.documentClick);
+            document.removeEventListener('keydown', this.eventHandlers.keydown);
+            window.removeEventListener('resize', this.eventHandlers.resize);
+            
+            // Odstranit chat input listenery
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput && this.eventHandlers.chatInputInput) {
+                chatInput.removeEventListener('input', this.eventHandlers.chatInputInput);
+                chatInput.removeEventListener('keydown', this.eventHandlers.chatInputKeydown);
+            }
+        }
+        
+        // Vyčistit timery
+        if (this.resizeTimer) {
+            clearTimeout(this.resizeTimer);
+        }
+        
         // Vyčistit reference
         this.lastSystemMessageElement = null;
         this.aboutModal = null;
         this.securityModal = null;
+        this.eventHandlers = null;
         
         console.log('🧹 UI Manager destroyed');
     }
