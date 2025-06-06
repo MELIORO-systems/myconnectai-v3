@@ -1,5 +1,5 @@
 // Model Loader - Automatické načítání a registrace modelů
-// Verze: 2.0 - S vylepšeným error handling
+// Verze: 2.1 - S podporou všech providerů
 
 class ModelLoader {
     constructor() {
@@ -107,7 +107,7 @@ class ModelLoader {
                     }
                     
                 case 'anthropic':
-                    // Pro budoucí implementaci
+                    // Anthropic (Claude) modely
                     if (window.AnthropicModel) {
                         return new AnthropicModel(modelDef.id, modelDef);
                     } else {
@@ -115,39 +115,42 @@ class ModelLoader {
                         return null;
                     }
                     
-                case 'google':
-                    // Pro budoucí implementaci
-                    if (window.GoogleModel) {
-                        return new GoogleModel(modelDef.id, modelDef);
-                    } else {
-                        console.warn('Google model implementation not found - skipping');
-                        return null;
-                    }
-
                 case 'perplexity':
+                    // Perplexity modely
                     if (window.PerplexityModel) {
                         return new PerplexityModel(modelDef.id, modelDef);
                     } else {
                         console.warn('Perplexity model implementation not found - skipping');
                         return null;
                     }
-    
+                    
                 case 'together':
+                    // Together AI modely
                     if (window.TogetherModel) {
                         return new TogetherModel(modelDef.id, modelDef);
                     } else {
                         console.warn('Together model implementation not found - skipping');
                         return null;
                     }
-    
+                    
                 case 'cohere':
+                    // Cohere modely
                     if (window.CohereModel) {
                         return new CohereModel(modelDef.id, modelDef);
                     } else {
                         console.warn('Cohere model implementation not found - skipping');
                         return null;
                     }
-      
+                    
+                case 'google':
+                    // Google (Gemini) modely - pro budoucí implementaci
+                    if (window.GoogleModel) {
+                        return new GoogleModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Google model implementation not found - skipping');
+                        return null;
+                    }
+                    
                 default:
                     console.warn(`Unknown provider: ${modelDef.provider}`);
                     return null;
@@ -278,4 +281,4 @@ class ModelLoader {
 // Vytvořit globální instanci
 window.modelLoader = new ModelLoader();
 
-console.log('📦 Model Loader ready (v2.0 - Fixed)');
+console.log('📦 Model Loader ready (v2.1 - All providers)');
