@@ -75,6 +75,22 @@ class SettingsManager {
         this.updateSaveButton();
     }
 
+    // Získat enabled providery z registry
+    getEnabledProviders() {
+        const enabledProviders = new Set();
+        
+        if (window.ModelsRegistryHelper) {
+            const enabledModels = window.ModelsRegistryHelper.getEnabledModels();
+            enabledModels.forEach(model => {
+                if (model.provider) {
+                    enabledProviders.add(model.provider);
+                }
+            });
+        }
+        
+        return Array.from(enabledProviders);
+    }
+
     // Načíst model selector - async verze
     async loadModelSelector() {
         const select = document.getElementById('model-select');
@@ -175,14 +191,32 @@ class SettingsManager {
 
     // Načíst API klíče - async verze
     async loadApiKeys() {
-        // OpenAI
-        await this.loadApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
+        // Získat enabled providery z registry
+        const enabledProviders = this.getEnabledProviders();
         
-        // Anthropic
-        await this.loadApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+        // Skrýt všechny API key skupiny
+        document.querySelectorAll('.api-key-group').forEach(group => {
+            group.style.display = 'none';
+        });
         
-        // Google
-        await this.loadApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        // Zobrazit a načíst pouze API klíče pro enabled providery
+        if (enabledProviders.includes('openai')) {
+            const openaiGroup = document.getElementById('openai-api-group');
+            if (openaiGroup) openaiGroup.style.display = 'block';
+            await this.loadApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
+        }
+        
+        if (enabledProviders.includes('anthropic')) {
+            const anthropicGroup = document.getElementById('anthropic-api-group');
+            if (anthropicGroup) anthropicGroup.style.display = 'block';
+            await this.loadApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+        }
+        
+        if (enabledProviders.includes('google')) {
+            const googleGroup = document.getElementById('google-api-group');
+            if (googleGroup) googleGroup.style.display = 'block';
+            await this.loadApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        }
     }
 
     // Načíst jednotlivý API klíč - async verze
@@ -309,14 +343,20 @@ class SettingsManager {
 
     // Uložit API klíče
     async saveApiKeys() {
-        // OpenAI
-        await this.saveApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
+        const enabledProviders = this.getEnabledProviders();
         
-        // Anthropic
-        await this.saveApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+        // Uložit pouze API klíče pro enabled providery
+        if (enabledProviders.includes('openai')) {
+            await this.saveApiKey('openai', CONFIG.STORAGE.KEYS.OPENAI_KEY);
+        }
         
-        // Google
-        await this.saveApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        if (enabledProviders.includes('anthropic')) {
+            await this.saveApiKey('anthropic', CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+        }
+        
+        if (enabledProviders.includes('google')) {
+            await this.saveApiKey('google', CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+        }
     }
 
     // Uložit jednotlivý API klíč - vylepšená verze
