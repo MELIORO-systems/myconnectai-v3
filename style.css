@@ -1156,26 +1156,3 @@ body {
     white-space: nowrap;
     border: 0;
 }
-/* Export/Import Buttons */
-.export-import-buttons {
-    display: flex;
-    gap: 1rem;
-}
-
-.action-btn {
-    flex: 1;
-    padding: 0.875rem 1.25rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.action-btn:hover {
-    background: var(--surface-hover);
-    border-color: var(--primary-color);
-}
