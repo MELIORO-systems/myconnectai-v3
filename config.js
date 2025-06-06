@@ -132,6 +132,9 @@ const CONFIG = {
             OPENAI_KEY: "secure_openai_key",
             ANTHROPIC_KEY: "secure_anthropic_key", 
             GOOGLE_KEY: "secure_google_key",
+            PERPLEXITY_KEY: "secure_perplexity_key",
+            TOGETHER_KEY: "secure_together_key",
+            COHERE_KEY: "secure_cohere_key",
             
             // Model specific
             OPENAI_ASSISTANT_ID: "openai_assistant_id",
@@ -177,7 +180,12 @@ const CONFIG = {
             ANTHROPIC: /^sk-ant-[a-zA-Z0-9_-]{20,}$/,
             
             // Google klíče
-            GOOGLE: /^AIza[a-zA-Z0-9_-]{20,}$/
+            GOOGLE: /^AIza[a-zA-Z0-9_-]{20,}$/,
+            
+            // nové
+            PERPLEXITY: /^pplx-[a-zA-Z0-9_-]{20,}$/,
+            TOGETHER: /^[a-zA-Z0-9_-]{40,}$/,  // Together používá dlouhé klíče
+            COHERE: /^[a-zA-Z0-9_-]{30,}$/     // Cohere klíče
         }
     },
     
