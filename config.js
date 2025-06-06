@@ -1,9 +1,9 @@
 // Konfigurace aplikace - MyConnectAI v3
-// Verze: 3.0 - Models Registry s lokálním ukládáním
+// Verze: 3.1 - S méně striktní validací API klíčů
 
 const CONFIG = {
     // === ZÁKLADNÍ NASTAVENÍ ===
-    VERSION: "3.0",
+    VERSION: "3.1",
     LAST_UPDATE: new Date().toISOString(),
     
     // === DEBUG MODE ===
@@ -108,7 +108,7 @@ const CONFIG = {
     SYSTEM: {
         NAME: "MyConnectAI v3",
         DESCRIPTION: "Multi-Model AI Chat aplikace s podporou různých jazykových modelů",
-        VERSION: "3.0.0",
+        VERSION: "3.1.0",
         BUILD_DATE: "2024-12-06",
         AUTHOR: "MELIORO Systems",
         LICENSE: "Proprietary",
@@ -168,11 +168,16 @@ const CONFIG = {
         // Maximální délka zprávy
         MAX_MESSAGE_LENGTH: 4000,
         
-        // Vzory pro validaci API klíčů
+        // Vzory pro validaci API klíčů - MÉNĚ STRIKTNÍ
         API_KEY_PATTERNS: {
-            OPENAI: /^sk-[a-zA-Z0-9]{48,}$/,
-            ANTHROPIC: /^sk-ant-[a-zA-Z0-9-]{40,}$/,
-            GOOGLE: /^AIza[a-zA-Z0-9-_]{35}$/
+            // OpenAI klíče mohou mít různé formáty a délky
+            OPENAI: /^(sk-[a-zA-Z0-9]{20,}|sess-[a-zA-Z0-9]{20,})$/,
+            
+            // Anthropic klíče
+            ANTHROPIC: /^sk-ant-[a-zA-Z0-9-]{20,}$/,
+            
+            // Google klíče
+            GOOGLE: /^AIza[a-zA-Z0-9-_]{20,}$/
         }
     },
     
