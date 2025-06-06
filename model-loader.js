@@ -15,10 +15,10 @@ class ModelLoader {
         console.log('🔄 Model Loader initializing...');
         
         try {
-            // 1. Načíst všechny modely z registry
+            // 1. Načíst všechny modely z registry - MUSÍ být první
             await this.loadModelsFromRegistry();
             
-            // 2. Načíst uživatelské preference
+            // 2. Načíst uživatelské preference - až po načtení modelů
             this.loadUserPreferences();
             
             // 3. Aplikovat debug mode pokud je zapnutý
@@ -31,6 +31,10 @@ class ModelLoader {
             
         } catch (error) {
             console.error('❌ Model Loader initialization failed:', error);
+            // Cleanup při selhání
+            this.loadedModels.clear();
+            this.failedModels.clear();
+            this.initialized = false;
             throw error;
         }
     }
@@ -231,12 +235,18 @@ class ModelLoader {
         console.log('🔄 Reloading models...');
         
         // Vyčistit existující modely
-        this.loadedModels.clear();
-        this.failedModels.clear();
-        this.initialized = false;
+        this.cleanup();
         
         // Znovu načíst
         await this.initialize();
+    }
+    
+    // Cleanup metoda
+    cleanup() {
+        this.loadedModels.clear();
+        this.failedModels.clear();
+        this.initialized = false;
+        console.log('🧹 Model Loader cleaned up');
     }
 }
 
