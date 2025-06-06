@@ -176,21 +176,29 @@ async function initApp() {
             console.log('✅ Security Manager ready');
         }
         
-        // 2. Inicializovat Model Manager (druhý, protože Model Loader ho potřebuje)
+        // 2. Inicializovat Model Manager (druhý, ale neinicializovat aktivní model)
         if (window.modelManager) {
-            console.log('⏳ Initializing Model Manager...');
-            await window.modelManager.initialize();
-            console.log('✅ Model Manager ready');
+            console.log('⏳ Preparing Model Manager...');
+            // Model Manager potřebujeme, ale nechceme ho plně inicializovat
+            // protože ještě nemáme načtené modely
+            console.log('✅ Model Manager ready for model registration');
         }
         
-        // 3. Inicializovat Model Loader (třetí, po Model Manageru)
+        // 3. Inicializovat Model Loader (třetí, načte a zaregistruje modely)
         if (window.modelLoader) {
             console.log('⏳ Initializing Model Loader...');
             await window.modelLoader.initialize();
             console.log('✅ Model Loader ready');
         }
         
-        // 4. Validovat konfiguraci
+        // 4. Nyní inicializovat Model Manager (po načtení modelů)
+        if (window.modelManager) {
+            console.log('⏳ Initializing Model Manager...');
+            await window.modelManager.initialize();
+            console.log('✅ Model Manager ready');
+        }
+        
+        // 5. Validovat konfiguraci
         if (window.modelManager) {
             const issues = await window.modelManager.validateConfiguration();
             if (issues.length > 0) {
@@ -218,7 +226,7 @@ async function initApp() {
             }
         }
         
-        // 5. Debug mode
+        // 6. Debug mode
         if (CONFIG.DEBUG_MODE) {
             console.log('🐛 Debug mode is ON');
             window.debugInfo = {
