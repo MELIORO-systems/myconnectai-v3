@@ -507,26 +507,58 @@ class SettingsManager {
     async save() {
         try {
             console.log('💾 Saving settings...');
+            let hasErrors = false;
+            const errors = [];
 
             // 1. Uložit vybraný model
             if (this.selectedModel && window.modelManager) {
-                await window.modelManager.setActiveModel(this.selectedModel);
+                try {
+                    await window.modelManager.setActiveModel(this.selectedModel);
+                } catch (error) {
+                    hasErrors = true;
+                    errors.push(`Model: ${error.message}`);
+                    console.error('Error setting active model:', error);
+                }
             }
 
             // 2. Uložit téma
             if (this.selectedTheme && window.uiManager) {
-                window.uiManager.setTheme(this.selectedTheme);
+                try {
+                    window.uiManager.setTheme(this.selectedTheme);
+                } catch (error) {
+                    hasErrors = true;
+                    errors.push(`Téma: ${error.message}`);
+                    console.error('Error setting theme:', error);
+                }
             }
 
             // 3. Uložit API klíče
-            await this.saveApiKeys();
+            try {
+                await this.saveApiKeys();
+            } catch (error) {
+                hasErrors = true;
+                errors.push(`API klíče: ${error.message}`);
+                console.error('Error saving API keys:', error);
+            }
 
             // 4. Uložit specifická nastavení
-            this.saveModelSpecificSettings();
+            try {
+                this.saveModelSpecificSettings();
+            } catch (error) {
+                hasErrors = true;
+                errors.push(`Specifická nastavení: ${error.message}`);
+                console.error('Error saving specific settings:', error);
+            }
 
             // 5. Invalidovat API key cache v model manageru
             if (window.modelManager) {
                 window.modelManager.invalidateApiKeyCache();
+            }
+
+            // Pokud byly nějaké chyby, zobrazit je
+            if (hasErrors) {
+                this.showStatus('error', `Některá nastavení se nepodařilo uložit:\n${errors.join('\n')}`);
+                return;
             }
 
             // Reset změn
@@ -587,17 +619,25 @@ class SettingsManager {
         console.log(`✅ ${provider} API key saved`);
     }
 
-    // Validace API klíče - méně striktní verze
+    // Validace API klíče - sjednocená s config.js
     validateApiKey(provider, apiKey) {
         // Základní validace délky
         if (apiKey.length < 20) {
             return false;
         }
         
-        // Provider-specific validace
+        // Použít regex z konfigurace pokud existuje
+        if (CONFIG.VALIDATION?.API_KEY_PATTERNS) {
+            const pattern = CONFIG.VALIDATION.API_KEY_PATTERNS[provider.toUpperCase()];
+            if (pattern && pattern instanceof RegExp) {
+                return pattern.test(apiKey);
+            }
+        }
+        
+        // Fallback validace pokud není v konfiguraci
         switch (provider) {
             case 'openai':
-                // OpenAI klíče začínají sk- nebo jsou session klíče
+                // OpenAI klíče začínají sk- nebo sess-
                 return apiKey.startsWith('sk-') || apiKey.startsWith('sess-');
                 
             case 'anthropic':
