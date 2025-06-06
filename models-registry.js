@@ -80,7 +80,7 @@ const MODELS_REGISTRY = [
         id: "claude-3-opus-20240229",
         provider: "anthropic",
         name: "Claude 3 Opus",
-        enabled: true,
+        enabled: false,
         visible: false,
         config: {
             model: "claude-3-opus-20240229",
@@ -97,8 +97,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-5-sonnet-20241022",
         provider: "anthropic",
         name: "Claude 3.5 Sonnet",
-        enabled: true,
-        visible: true,
+        enabled: false,
+        visible: false,
         config: {
             model: "claude-3-5-sonnet-20241022",
             contextWindow: 200000,
@@ -114,7 +114,7 @@ const MODELS_REGISTRY = [
         id: "claude-3-haiku-20240307",
         provider: "anthropic",
         name: "Claude 3 Haiku",
-        enabled: true,
+        enabled: false,
         visible: false,
         config: {
             model: "claude-3-haiku-20240307",
@@ -133,8 +133,8 @@ const MODELS_REGISTRY = [
         id: "gemini-pro",
         provider: "google",
         name: "Gemini Pro",
-        enabled: true,
-        visible: true,
+        enabled: false,
+        visible: false,
         config: {
             model: "gemini-pro",
             contextWindow: 32000,
@@ -150,7 +150,7 @@ const MODELS_REGISTRY = [
         id: "gemini-1.5-pro",
         provider: "google",
         name: "Gemini 1.5 Pro",
-        enabled: true,
+        enabled: false,
         visible: false,
         config: {
             model: "gemini-1.5-pro-latest",
