@@ -144,6 +144,9 @@ class SettingsManager {
             'openai': 'OpenAI',
             'anthropic': 'Anthropic (Claude)',
             'google': 'Google (Gemini)'
+            'perplexity': 'Perplexity AI',
+            'together': 'Together AI',
+            'cohere': 'Cohere'
         };
         return names[provider] || provider;
     }
@@ -212,6 +215,9 @@ class SettingsManager {
             'openai': 'https://platform.openai.com/api-keys',
             'anthropic': 'https://console.anthropic.com/',
             'google': 'https://aistudio.google.com/app/apikey'
+            'perplexity': 'https://www.perplexity.ai/settings/api',
+            'together': 'https://api.together.xyz/settings/api-keys',
+            'cohere': 'https://dashboard.cohere.com/api-keys'
         };
         return urls[provider] || '#';
     }
@@ -222,6 +228,9 @@ class SettingsManager {
             'openai': 'platform.openai.com',
             'anthropic': 'console.anthropic.com',
             'google': 'aistudio.google.com'
+            'perplexity': 'perplexity.ai',
+            'together': 'together.xyz',
+            'cohere': 'dashboard.cohere.com'
         };
         return domains[provider] || provider;
     }
@@ -464,6 +473,9 @@ class SettingsManager {
             'openai': 'sk-...',
             'anthropic': 'sk-ant-...',
             'google': 'AIza...'
+            'perplexity': 'pplx-...',
+            'together': 'Váš Together AI klíč',
+            'cohere': 'Váš Cohere API klíč'
         };
         return placeholders[provider] || 'API Key';
     }
