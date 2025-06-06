@@ -1,5 +1,5 @@
 // Settings Manager - Správa nastavení aplikace
-// Verze: 1.1 - Vylepšená verze s async operacemi a lepší validací
+// Verze: 2.0 - Opravená s konzistentním async/await a validacemi
 
 class SettingsManager {
     constructor() {
@@ -8,6 +8,7 @@ class SettingsManager {
         this.selectedTheme = null;
         this.selectedModel = null;
         this.eventListeners = new Map();
+        this.debounceTimers = new Map();
     }
 
     // Otevřít nastavení
@@ -123,8 +124,6 @@ class SettingsManager {
     
     // Získat enabled modely pro providera
     getEnabledModelsForProvider(provider) {
-        const models = [];
-        
         if (window.ModelsRegistryHelper) {
             const allModels = window.ModelsRegistryHelper.getEnabledModels();
             return allModels.filter(model => model.provider === provider);
@@ -136,7 +135,7 @@ class SettingsManager {
             return allModels.filter(model => model.provider === provider);
         }
         
-        return models;
+        return [];
     }
     
     // Získat display název providera
@@ -153,6 +152,7 @@ class SettingsManager {
     createApiKeyGroup(provider) {
         const group = document.createElement('div');
         group.className = 'api-key-group';
+        group.style.display = 'block'; // Zajistit viditelnost
         
         // Přidat security info pouze do první API key skupiny
         const isFirstProvider = !document.querySelector('.security-info');
@@ -201,7 +201,6 @@ class SettingsManager {
     // Vytvořit obecná nastavení providera
     createProviderSettings(provider) {
         // Zatím prázdné - pro budoucí rozšíření
-        // Například: default temperature, max tokens, atd.
         return null;
     }
     
@@ -235,14 +234,6 @@ class SettingsManager {
             return group;
         }
         
-        // Zde můžete přidat další speciální nastavení pro jiné features
-        // Například pro modely s vision podporou:
-        /*
-        if (modelDef.config?.vision === true) {
-            // Přidat nastavení pro vision mode
-        }
-        */
-        
         return null;
     }
     
@@ -256,9 +247,6 @@ class SettingsManager {
         
         // Hierarchická nastavení
         await this.loadHierarchicalSettings();
-        
-        // Specifická nastavení modelů
-        this.loadModelSpecificSettings();
         
         // Reset change tracking
         this.hasUnsavedChanges = false;
@@ -309,8 +297,8 @@ class SettingsManager {
             await window.modelManager.initialize();
         }
 
-        // Získat VIDITELNÉ modely (ne všechny)
-        const visibleModels = window.modelManager.getAvailableModels();
+        // Získat VIDITELNÉ modely
+        const visibleModels = window.modelManager.getAvailableModelsSync();
         const activeModel = window.modelManager.getActiveModel();
 
         // Vyčistit loading option
@@ -340,7 +328,7 @@ class SettingsManager {
             if (models.length > 0) {
                 // Přidat optgroup pro providera
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = provider.charAt(0).toUpperCase() + provider.slice(1);
+                optgroup.label = this.getProviderDisplayName(provider);
                 
                 models.forEach(model => {
                     const option = document.createElement('option');
@@ -405,7 +393,7 @@ class SettingsManager {
         }
 
         // Pokud existuje uložený klíč, zobrazit placeholder
-        const savedKey = await security.loadSecure(storageKey);
+        const savedKey = await window.security.loadSecure(storageKey);
         if (savedKey) {
             input.value = '';
             input.placeholder = '••••••••••••••• (uloženo)';
@@ -415,10 +403,8 @@ class SettingsManager {
         }
 
         // Event listener s debounce
-        let timeout;
         this.addEventListener(input, 'input', () => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => this.markAsChanged(), 300);
+            this.markAsChangedDebounced();
         });
     }
 
@@ -432,11 +418,20 @@ class SettingsManager {
         return placeholders[provider] || 'API Key';
     }
 
-    // Načíst specifická nastavení modelů (nyní je prázdné, vše je v hierarchii)
-    loadModelSpecificSettings() {
-        // Vše je nyní řešeno v loadHierarchicalSettings
-        // Tato funkce zůstává pro zpětnou kompatibilitu
-        // Už nevoláme updateModelSpecificSettings protože element neexistuje
+    // Označit jako změněno s debounce
+    markAsChangedDebounced() {
+        // Clear existing timer
+        if (this.debounceTimers.has('markAsChanged')) {
+            clearTimeout(this.debounceTimers.get('markAsChanged'));
+        }
+        
+        // Set new timer
+        const timer = setTimeout(() => {
+            this.markAsChanged();
+            this.debounceTimers.delete('markAsChanged');
+        }, 300);
+        
+        this.debounceTimers.set('markAsChanged', timer);
     }
 
     // Označit jako změněno
@@ -480,6 +475,11 @@ class SettingsManager {
             // 4. Uložit specifická nastavení
             this.saveModelSpecificSettings();
 
+            // 5. Invalidovat API key cache v model manageru
+            if (window.modelManager) {
+                window.modelManager.invalidateApiKeyCache();
+            }
+
             // Reset změn
             this.hasUnsavedChanges = false;
             this.updateSaveButton();
@@ -494,7 +494,7 @@ class SettingsManager {
 
         } catch (error) {
             console.error('❌ Error saving settings:', error);
-            this.showStatus('error', CONFIG.MESSAGES.SETTINGS_SAVE_ERROR);
+            this.showStatus('error', error.message || CONFIG.MESSAGES.SETTINGS_SAVE_ERROR);
         }
     }
 
@@ -520,7 +520,7 @@ class SettingsManager {
         
         // Pokud je prázdný a už máme uložený, nechat ho
         if (!apiKey) {
-            const existing = await security.loadSecure(storageKey);
+            const existing = await window.security.loadSecure(storageKey);
             if (existing) {
                 console.log(`✅ Keeping existing ${provider} API key`);
                 return;
@@ -534,7 +534,7 @@ class SettingsManager {
         }
 
         // Uložit
-        await security.saveSecure(storageKey, apiKey);
+        await window.security.saveSecure(storageKey, apiKey);
         console.log(`✅ ${provider} API key saved`);
     }
 
@@ -599,7 +599,7 @@ class SettingsManager {
                 'google': CONFIG.STORAGE.KEYS.GOOGLE_KEY
             }[provider];
             
-            apiKey = await security.loadSecure(storageKey);
+            apiKey = await window.security.loadSecure(storageKey);
         }
 
         if (!apiKey) {
@@ -619,7 +619,13 @@ class SettingsManager {
                 this.showStatus('error', CONFIG.MESSAGES.API_KEY_INVALID);
             }
         } catch (error) {
-            this.showStatus('error', `Test selhal: ${error.message}`);
+            if (error.code === 'TEST_TIMEOUT') {
+                this.showStatus('error', 'Test vypršel - zkuste to znovu');
+            } else if (error.message?.includes('Network')) {
+                this.showStatus('error', 'Chyba sítě - zkontrolujte připojení');
+            } else {
+                this.showStatus('error', `Test selhal: ${error.message}`);
+            }
         }
     }
 
@@ -642,7 +648,7 @@ class SettingsManager {
             if (!password) return;
 
             // Validace hesla
-            const passwordValidation = security.validatePassword(password);
+            const passwordValidation = window.security.validatePassword(password);
             if (!passwordValidation.valid) {
                 this.showStatus('error', passwordValidation.message);
                 return;
@@ -650,7 +656,7 @@ class SettingsManager {
 
             // Přidat API klíče pokud je to povoleno
             if (CONFIG.EXPORT.INCLUDE.API_KEYS) {
-                config.apiKeys = await security.exportSecureData(password);
+                config.apiKeys = await window.security.exportSecureData(password);
             }
 
             // Vytvořit blob a stáhnout
@@ -698,7 +704,7 @@ class SettingsManager {
                     if (!password) return;
 
                     // Import API klíčů
-                    const imported = await security.importSecureData(config.apiKeys, password);
+                    const imported = await window.security.importSecureData(config.apiKeys, password);
                     if (!imported) {
                         throw new Error('Nesprávné heslo');
                     }
@@ -720,6 +726,16 @@ class SettingsManager {
                             }
                         }
                     });
+                }
+
+                // Aplikovat viditelnost modelů
+                if (config.settings?.visibleModels && window.modelManager) {
+                    try {
+                        const visibleModels = JSON.parse(config.settings.visibleModels);
+                        window.modelManager.setModelVisibility(visibleModels);
+                    } catch (e) {
+                        console.error('Error applying model visibility:', e);
+                    }
                 }
 
                 this.showStatus('success', CONFIG.MESSAGES.IMPORT_SUCCESS);
@@ -748,7 +764,11 @@ class SettingsManager {
         statusDiv.style.display = 'block';
 
         // Automaticky skrýt po 5 sekundách
-        setTimeout(() => {
+        if (this.statusTimer) {
+            clearTimeout(this.statusTimer);
+        }
+        
+        this.statusTimer = setTimeout(() => {
             this.clearStatus();
         }, 5000);
     }
@@ -760,6 +780,11 @@ class SettingsManager {
             statusDiv.style.display = 'none';
             statusDiv.className = 'settings-status';
             statusDiv.textContent = '';
+        }
+        
+        if (this.statusTimer) {
+            clearTimeout(this.statusTimer);
+            this.statusTimer = null;
         }
     }
 
@@ -845,7 +870,7 @@ class SettingsManager {
         elementListeners.set(event, handler);
     }
 
-    // Cleanup event listenerů
+    // Cleanup event listenerů a timerů
     cleanup() {
         // Odstranit všechny event listenery
         this.eventListeners.forEach((listeners, element) => {
@@ -856,6 +881,15 @@ class SettingsManager {
         
         this.eventListeners.clear();
         
+        // Vyčistit všechny timery
+        this.debounceTimers.forEach(timer => clearTimeout(timer));
+        this.debounceTimers.clear();
+        
+        if (this.statusTimer) {
+            clearTimeout(this.statusTimer);
+            this.statusTimer = null;
+        }
+        
         console.log('🧹 Settings cleanup completed');
     }
 }
@@ -863,4 +897,4 @@ class SettingsManager {
 // Vytvořit globální instanci
 window.settingsManager = new SettingsManager();
 
-console.log('⚙️ Settings Manager loaded');
+console.log('⚙️ Settings Manager loaded (v2.0 - Fixed)');
