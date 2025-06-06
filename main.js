@@ -355,6 +355,35 @@ window.addEventListener('unhandledrejection', (event) => {
     }
 });
 
+// Window unload handler - cleanup všech komponent
+window.addEventListener('beforeunload', () => {
+    console.log('🧹 Cleaning up before unload...');
+    
+    try {
+        // Cleanup všech managerů
+        if (window.uiManager && window.uiManager.destroy) {
+            window.uiManager.destroy();
+        }
+        
+        if (window.settingsManager && window.settingsManager.cleanup) {
+            window.settingsManager.cleanup();
+        }
+        
+        if (window.modelManager && window.modelManager.destroy) {
+            window.modelManager.destroy();
+        }
+        
+        // Vyčistit timery
+        if (rateLimitTimer) {
+            clearTimeout(rateLimitTimer);
+        }
+        
+        console.log('✅ Cleanup completed');
+    } catch (error) {
+        console.error('Error during cleanup:', error);
+    }
+});
+
 // Export pro globální přístup
 window.chatSystem = {
     messages: messages,
