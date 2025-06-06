@@ -1,7 +1,7 @@
 // Hlavní aplikační logika - MyConnectAI v3.2
-// Verze: 3.2 - Opravená inicializační sekvence a error handling
+// Verze: 3.3 - S podporou všech providerů
 
-const APP_VERSION = "3.2";
+const APP_VERSION = "3.3";
 
 // Globální proměnné
 let messages = [];
@@ -118,6 +118,9 @@ async function sendMessage() {
                 case 'NETWORK_ERROR':
                     errorMessage = CONFIG.MESSAGES.CONNECTION_ERROR;
                     break;
+                case 'CORS_ERROR':
+                    errorMessage = 'Tento AI provider nelze volat přímo z prohlížeče. Zkuste jiný model.';
+                    break;
                 default:
                     errorMessage = error.message;
             }
@@ -164,7 +167,7 @@ function clearChat() {
 
 // Inicializace aplikace s lepší kontrolou závislostí
 async function initApp() {
-    console.log('🚀 Starting MyConnectAI v3.2...');
+    console.log('🚀 Starting MyConnectAI v' + APP_VERSION + '...');
     console.log('📌 App Version:', APP_VERSION);
     console.log('📌 Config Version:', CONFIG.VERSION);
     
@@ -244,9 +247,9 @@ async function initApp() {
                     activeModel: window.modelManager?.getActiveModel()?.id,
                     visibleModels: window.modelManager?.getAvailableModelsSync().length
                 }),
-                // Test funkce
+                // Test funkce - rozšířená pro všechny providery
                 testApiKeys: async () => {
-                    const providers = ['openai', 'anthropic', 'google'];
+                    const providers = ['openai', 'anthropic', 'google', 'perplexity', 'together', 'cohere'];
                     for (const provider of providers) {
                         const hasKey = await window.modelManager?.checkApiKey(provider);
                         console.log(`${provider}: ${hasKey ? '✅ configured' : '❌ missing'}`);
@@ -255,7 +258,7 @@ async function initApp() {
             };
         }
         
-        console.log('✅ MyConnectAI v3.2 ready');
+        console.log('✅ MyConnectAI v' + APP_VERSION + ' ready');
         
     } catch (error) {
         console.error('❌ Initialization failed:', error);
@@ -409,4 +412,4 @@ window.chatSystem = {
 // Zachování kompatibility
 window.sendMessage = sendMessage;
 
-console.log('📦 Main.js loaded (MyConnectAI v3.2)');
+console.log('📦 Main.js loaded (MyConnectAI v' + APP_VERSION + ')');
