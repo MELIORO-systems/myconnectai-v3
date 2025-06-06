@@ -1,6 +1,6 @@
 // Security Manager - Vylepšená bezpečnost s Web Crypto API
 // Používá AES-GCM šifrování místo XOR
-// Verze: 2.0 - Opravená bez duplikací metod
+// Verze: 2.1 - Opravená s lepším error handling pro export
 
 class SecurityManager {
     constructor() {
@@ -164,15 +164,33 @@ class SecurityManager {
         }
     }
     
-    // Dešifrování
+    // Dešifrování s lepším error handling
     async decrypt(encoded) {
         if (!encoded) return '';
         
         await this.waitForInit();
         
         try {
+            // Základní validace
+            if (typeof encoded !== 'string' || encoded.length < 20) {
+                console.warn('Invalid encrypted data format');
+                return '';
+            }
+            
             // Dekódovat z base64
-            const combined = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+            let combined;
+            try {
+                combined = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+            } catch (e) {
+                console.warn('Invalid base64 encoding');
+                return '';
+            }
+            
+            // Kontrola minimální délky (12 bytes IV + nějaká data)
+            if (combined.length < 13) {
+                console.warn('Encrypted data too short');
+                return '';
+            }
             
             // Rozdělit IV a data
             const iv = combined.slice(0, 12);
@@ -192,7 +210,7 @@ class SecurityManager {
             const decoder = new TextDecoder();
             return decoder.decode(decryptedBuffer);
         } catch (error) {
-            console.error('Decryption error:', error);
+            console.warn('Decryption failed for this item:', error.message);
             return '';
         }
     }
@@ -214,7 +232,7 @@ class SecurityManager {
         }
     }
     
-    // Načíst zabezpečenou hodnotu
+    // Načíst zabezpečenou hodnotu s lepším error handling
     async loadSecure(key) {
         const storageKey = CONFIG.STORAGE.PREFIX + key;
         const encrypted = localStorage.getItem(storageKey);
@@ -222,9 +240,12 @@ class SecurityManager {
         if (!encrypted) return null;
         
         try {
-            return await this.decrypt(encrypted);
+            const decrypted = await this.decrypt(encrypted);
+            return decrypted || null;
         } catch (error) {
-            console.error('Load secure error:', error);
+            console.warn(`Failed to decrypt ${key}, removing corrupted data`);
+            // Odstranit poškozená data
+            localStorage.removeItem(storageKey);
             return null;
         }
     }
@@ -249,53 +270,75 @@ class SecurityManager {
         console.log('🗑️ All secure data cleared');
     }
     
-    // Export všech zabezpečených dat
+    // Export všech zabezpečených dat s lepším error handling
     async exportSecureData(password) {
         const data = {};
         const prefix = CONFIG.STORAGE.PREFIX;
+        const errors = [];
         
         // Získat všechny zabezpečené klíče
         for (const key of Object.keys(localStorage)) {
             if (key.startsWith(prefix) && key !== prefix + CONFIG.STORAGE.KEYS.DEVICE_KEY) {
                 const cleanKey = key.replace(prefix, '');
-                const value = await this.loadSecure(cleanKey);
-                if (value) {
-                    data[cleanKey] = value;
+                try {
+                    const value = await this.loadSecure(cleanKey);
+                    if (value) {
+                        data[cleanKey] = value;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to export ${cleanKey}:`, error);
+                    errors.push(cleanKey);
                 }
             }
         }
         
-        // Vytvořit dočasný klíč z hesla
-        const passwordKey = await this.deriveKeyFromPassword(password);
+        // Pokud nejsou žádná data k exportu
+        if (Object.keys(data).length === 0) {
+            console.log('No secure data to export');
+            return null;
+        }
         
-        // Zašifrovat data pomocí password-based klíče
-        const jsonData = JSON.stringify(data);
-        const encoder = new TextEncoder();
-        const dataBuffer = encoder.encode(jsonData);
+        // Pokud byly nějaké chyby, informovat uživatele
+        if (errors.length > 0) {
+            console.warn('Some items could not be exported:', errors);
+        }
         
-        // IV pro password-based šifrování
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        
-        // Salt pro odvození klíče
-        const salt = crypto.getRandomValues(new Uint8Array(16));
-        
-        // Šifrovat
-        const encrypted = await crypto.subtle.encrypt(
-            {
-                name: 'AES-GCM',
-                iv: iv
-            },
-            passwordKey.key,
-            dataBuffer
-        );
-        
-        // Kombinovat salt, IV a data
-        const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
-        combined.set(salt, 0);
-        combined.set(iv, salt.length);
-        combined.set(new Uint8Array(encrypted), salt.length + iv.length);
-        
-        return btoa(String.fromCharCode(...combined));
+        try {
+            // Vytvořit dočasný klíč z hesla
+            const passwordKey = await this.deriveKeyFromPassword(password);
+            
+            // Zašifrovat data pomocí password-based klíče
+            const jsonData = JSON.stringify(data);
+            const encoder = new TextEncoder();
+            const dataBuffer = encoder.encode(jsonData);
+            
+            // IV pro password-based šifrování
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            
+            // Salt pro odvození klíče
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            
+            // Šifrovat
+            const encrypted = await crypto.subtle.encrypt(
+                {
+                    name: 'AES-GCM',
+                    iv: iv
+                },
+                passwordKey.key,
+                dataBuffer
+            );
+            
+            // Kombinovat salt, IV a data
+            const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+            combined.set(salt, 0);
+            combined.set(iv, salt.length);
+            combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+            
+            return btoa(String.fromCharCode(...combined));
+        } catch (error) {
+            console.error('Export encryption error:', error);
+            throw error;
+        }
     }
     
     // Import zabezpečených dat
@@ -442,6 +485,41 @@ class SecurityManager {
         const storageKey = CONFIG.STORAGE.PREFIX + key;
         return localStorage.getItem(storageKey) !== null;
     }
+    
+    // Vyčistit poškozená data
+    async cleanupCorruptedData() {
+        const prefix = CONFIG.STORAGE.PREFIX;
+        const corruptedKeys = [];
+        
+        for (const key of Object.keys(localStorage)) {
+            if (key.startsWith(prefix) && key !== prefix + CONFIG.STORAGE.KEYS.DEVICE_KEY) {
+                const value = localStorage.getItem(key);
+                // Základní kontrola validity
+                if (value && value.length > 0) {
+                    try {
+                        // Zkusit dekódovat base64
+                        atob(value);
+                        // Kontrola minimální délky
+                        if (value.length < 20) {
+                            corruptedKeys.push(key);
+                        }
+                    } catch (e) {
+                        corruptedKeys.push(key);
+                    }
+                }
+            }
+        }
+        
+        if (corruptedKeys.length > 0) {
+            console.log(`🧹 Found ${corruptedKeys.length} corrupted entries, cleaning up...`);
+            corruptedKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`  - Removed corrupted: ${key}`);
+            });
+        }
+        
+        return corruptedKeys.length;
+    }
 }
 
 // Vytvořit globální instanci
@@ -450,4 +528,4 @@ const security = new SecurityManager();
 // Export pro ostatní moduly
 window.security = security;
 
-console.log('🔐 Security Manager loaded (v2.0 - Fixed)');
+console.log('🔐 Security Manager loaded (v2.1 - Fixed export)');
