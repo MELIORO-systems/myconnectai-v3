@@ -294,20 +294,34 @@ class UIManager {
             return;
         }
         
+        // Vyčistit existující event listenery pokud existují
+        if (this.exampleQueryListeners) {
+            container.querySelectorAll('.example-query').forEach((element, index) => {
+                if (this.exampleQueryListeners[index]) {
+                    element.removeEventListener('click', this.exampleQueryListeners[index]);
+                }
+            });
+        }
+        
         container.innerHTML = queries.map((query, index) => `
             <div class="example-query" data-query="${this.escapeForAttribute(query)}">
                 ${this.escapeHtml(query)}
             </div>
         `).join('');
         
+        // Uložit reference na event listenery
+        this.exampleQueryListeners = [];
+        
         // Přidat event listenery
-        container.querySelectorAll('.example-query').forEach((element) => {
-            element.addEventListener('click', () => {
+        container.querySelectorAll('.example-query').forEach((element, index) => {
+            const handler = () => {
                 const query = element.getAttribute('data-query');
                 if (query) {
                     this.useExampleQuery(query);
                 }
-            });
+            };
+            this.exampleQueryListeners[index] = handler;
+            element.addEventListener('click', handler);
         });
     }
 
@@ -533,6 +547,19 @@ class UIManager {
                 chatInput.removeEventListener('input', this.eventHandlers.chatInputInput);
                 chatInput.removeEventListener('keydown', this.eventHandlers.chatInputKeydown);
             }
+        }
+        
+        // Odstranit example query listenery
+        if (this.exampleQueryListeners) {
+            const container = document.getElementById('example-queries');
+            if (container) {
+                container.querySelectorAll('.example-query').forEach((element, index) => {
+                    if (this.exampleQueryListeners[index]) {
+                        element.removeEventListener('click', this.exampleQueryListeners[index]);
+                    }
+                });
+            }
+            this.exampleQueryListeners = null;
         }
         
         // Vyčistit timery
