@@ -160,6 +160,7 @@ body {
 }
 
 /* === ACTION BUTTONS === */
+/* Základní styly pro action-button (stejné jako původní index-button) */
 .action-button {
     background: var(--surface);
     color: var(--text-primary);
@@ -183,6 +184,23 @@ body {
 
 .action-button:active {
     transform: translateY(0);
+}
+
+/* Carrd theme - speciální styly pro action-button (převzato z index-button) */
+.theme-carrd .action-button {
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 2rem;
+}
+
+.theme-carrd .action-button:hover {
+    background: var(--primary-color);
+    color: var(--background);
+    box-shadow: 0 0 20px rgba(0, 217, 217, 0.5);
+    transform: translateY(-2px);
 }
 
 /* === DROPDOWN MENU === */
@@ -1008,22 +1026,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-.theme-carrd .action-button {
-    border: 1px solid var(--primary-color);
-    background: transparent;
-    color: var(--primary-color);
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border-radius: 2rem;
-}
-
-.theme-carrd .action-button:hover {
-    background: var(--primary-color);
-    color: var(--background);
-    box-shadow: 0 0 20px rgba(0, 217, 217, 0.5);
-    transform: translateY(-2px);
 }
 
 .theme-carrd .theme-btn {
