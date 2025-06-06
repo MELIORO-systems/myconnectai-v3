@@ -112,8 +112,11 @@ class SettingsManager {
         
         container.appendChild(section);
         
-        // Načíst hodnoty
-        await this.loadApiKey(provider, CONFIG.STORAGE.KEYS[`${provider.toUpperCase()}_KEY`]);
+        // Načíst hodnoty - async
+        const storageKey = CONFIG.STORAGE.KEYS[`${provider.toUpperCase()}_KEY`];
+        if (storageKey) {
+            await this.loadApiKey(provider, storageKey);
+        }
     }
     
     // Získat enabled modely pro providera
@@ -196,8 +199,12 @@ class SettingsManager {
     
     // Vytvořit nastavení pro konkrétní model
     createModelSettings(modelDef) {
-        // Speciální nastavení pro OpenAI modely s Assistant mode
-        if (modelDef.provider === 'openai' && modelDef.config?.capabilities?.includes('assistant')) {
+        // Speciální nastavení pro OpenAI modely
+        // Zkontrolovat jestli JAKÝKOLIV OpenAI model má capability "assistant"
+        // nebo zobrazit pro všechny GPT-4 modely
+        if (modelDef.provider === 'openai' && 
+            (modelDef.id.includes('gpt-4') || modelDef.config?.capabilities?.includes('assistant'))) {
+            
             const group = document.createElement('div');
             group.className = 'model-settings-group';
             
