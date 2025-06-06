@@ -160,7 +160,7 @@ class SettingsManager {
             <div class="security-info">
                 <span class="security-text">
                     🔒 Vaše klíče jsou šifrovány AES-256 a zůstávají pouze ve vašem zařízení. 
-                    <a href="#" class="security-link" onclick="if(window.settingsManager) window.settingsManager.showSecurityInfo(); return false;">Více informací</a>
+                    <a href="#" class="security-link">Více informací</a>
                 </span>
             </div>
         ` : '';
@@ -170,11 +170,39 @@ class SettingsManager {
             <label>API Key</label>
             <div class="input-group">
                 <input type="password" id="${provider}-api-key" placeholder="${this.getApiKeyPlaceholder(provider)}" class="api-key-input">
-                <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('${provider}-api-key')">Zobrazit</button>
-                <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('${provider}')">Test</button>
+                <button class="toggle-btn" data-provider="${provider}">Zobrazit</button>
+                <button class="test-btn" data-provider="${provider}">Test</button>
             </div>
             <small>Získejte na <a href="${this.getProviderUrl(provider)}" target="_blank">${this.getProviderDomain(provider)}</a></small>
         `;
+        
+        // Přidat event listenery po vytvoření
+        setTimeout(() => {
+            const toggleBtn = group.querySelector('.toggle-btn');
+            const testBtn = group.querySelector('.test-btn');
+            const securityLink = group.querySelector('.security-link');
+            
+            if (toggleBtn) {
+                this.addEventListener(toggleBtn, 'click', () => {
+                    if (window.uiManager) {
+                        window.uiManager.toggleVisibility(`${provider}-api-key`);
+                    }
+                });
+            }
+            
+            if (testBtn) {
+                this.addEventListener(testBtn, 'click', () => {
+                    this.testApiKey(provider);
+                });
+            }
+            
+            if (securityLink) {
+                this.addEventListener(securityLink, 'click', (e) => {
+                    e.preventDefault();
+                    this.showSecurityInfo();
+                });
+            }
+        }, 0);
         return group;
     }
     
@@ -223,13 +251,34 @@ class SettingsManager {
                 </div>
             `;
             
-            // Přidat event listener pro změny
-            setTimeout(() => {
+            // Použít MutationObserver místo setTimeout pro spolehlivé připojení event listeneru
+            const setupListener = () => {
                 const input = document.getElementById('openai-assistant-id');
                 if (input) {
                     this.addEventListener(input, 'change', () => this.markAsChanged());
+                    return true;
                 }
-            }, 100);
+                return false;
+            };
+            
+            // Zkusit ihned
+            if (!setupListener()) {
+                // Pokud element ještě neexistuje, použít MutationObserver
+                const observer = new MutationObserver((mutations, obs) => {
+                    if (setupListener()) {
+                        obs.disconnect();
+                    }
+                });
+                
+                // Pozorovat container pro změny
+                const container = document.getElementById('providers-settings');
+                if (container) {
+                    observer.observe(container, { childList: true, subtree: true });
+                    
+                    // Cleanup observer po 5 sekundách (failsafe)
+                    setTimeout(() => observer.disconnect(), 5000);
+                }
+            }
             
             return group;
         }
