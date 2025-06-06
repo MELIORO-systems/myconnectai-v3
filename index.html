@@ -61,9 +61,7 @@
         <!-- PATIČKA -->
         <div class="app-footer">
             <div class="footer-content">
-                <span class="footer-text">Powered by <a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link"><strong>MELIORO Systems</strong></a></span>
-                <span class="footer-separator">•</span>
-                <span class="footer-text"><a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link">Návrat na stránky MELIORO</a></span>
+                <span class="footer-text">Powered by <a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link"><strong>MELIORO Systems</strong></a>. Návrat na stránky <a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link"><strong>MELIORO</strong></a>.</span>
             </div>
         </div>
     </div>
@@ -100,7 +98,7 @@
                 <div class="settings-section">
                     <h3>API Klíče</h3>
                     
-                    <div class="api-key-group">
+                    <div class="api-key-group" id="openai-api-group">
                         <label>OpenAI API Key</label>
                         <div class="input-group">
                             <input type="password" id="openai-api-key" placeholder="sk-..." class="api-key-input">
@@ -110,7 +108,7 @@
                         <small>Získejte na <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></small>
                     </div>
                     
-                    <div class="api-key-group">
+                    <div class="api-key-group" id="anthropic-api-group">
                         <label>Anthropic API Key (Claude)</label>
                         <div class="input-group">
                             <input type="password" id="anthropic-api-key" placeholder="sk-ant-..." class="api-key-input">
@@ -120,7 +118,7 @@
                         <small>Získejte na <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></small>
                     </div>
                     
-                    <div class="api-key-group">
+                    <div class="api-key-group" id="google-api-group">
                         <label>Google API Key (Gemini)</label>
                         <div class="input-group">
                             <input type="password" id="google-api-key" placeholder="AIza..." class="api-key-input">
