@@ -170,14 +170,14 @@ const CONFIG = {
         
         // Vzory pro validaci API klíčů - MÉNĚ STRIKTNÍ
         API_KEY_PATTERNS: {
-            // OpenAI klíče mohou mít různé formáty a délky
-            OPENAI: /^(sk-[a-zA-Z0-9]{20,}|sess-[a-zA-Z0-9]{20,})$/,
+            // OpenAI klíče mohou obsahovat písmena, číslice, pomlčky a podtržítka
+            OPENAI: /^(sk-[a-zA-Z0-9_-]{20,}|sess-[a-zA-Z0-9_-]{20,})$/,
             
             // Anthropic klíče
-            ANTHROPIC: /^sk-ant-[a-zA-Z0-9-]{20,}$/,
+            ANTHROPIC: /^sk-ant-[a-zA-Z0-9_-]{20,}$/,
             
             // Google klíče
-            GOOGLE: /^AIza[a-zA-Z0-9-_]{20,}$/
+            GOOGLE: /^AIza[a-zA-Z0-9_-]{20,}$/
         }
     },
     
