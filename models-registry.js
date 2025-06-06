@@ -80,8 +80,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-opus-20240229",
         provider: "anthropic",
         name: "Claude 3 Opus",
-        enabled: false,
-        visible: false,
+        enabled: true,
+        visible: true,
         config: {
             model: "claude-3-opus-20240229",
             contextWindow: 200000,
@@ -97,8 +97,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-5-sonnet-20241022",
         provider: "anthropic",
         name: "Claude 3.5 Sonnet",
-        enabled: false,
-        visible: false,
+        enabled: true,
+        visible: true,
         config: {
             model: "claude-3-5-sonnet-20241022",
             contextWindow: 200000,
@@ -114,8 +114,8 @@ const MODELS_REGISTRY = [
         id: "claude-3-haiku-20240307",
         provider: "anthropic",
         name: "Claude 3 Haiku",
-        enabled: false,
-        visible: false,
+        enabled: true,
+        visible: true,
         config: {
             model: "claude-3-haiku-20240307",
             contextWindow: 200000,
