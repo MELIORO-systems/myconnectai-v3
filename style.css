@@ -315,6 +315,29 @@ body {
     align-items: center;
 }
 
+.modal-footer-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.cancel-button {
+    padding: 0.875rem 2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+    background: var(--surface-hover);
+    border-color: var(--text-secondary);
+}
+
 /* === SETTINGS SECTIONS === */
 .settings-section {
     margin-bottom: 2rem;
@@ -350,6 +373,22 @@ body {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+}
+
+.settings-select optgroup {
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--surface);
+}
+
+.settings-select option {
+    font-weight: 400;
+    padding: 0.5rem;
+}
+
+.settings-select option:disabled {
+    color: var(--text-muted);
+    font-style: italic;
 }
 
 /* Theme Selector */
@@ -397,6 +436,7 @@ body {
 /* API Key Inputs */
 .api-key-group {
     margin-bottom: 1.5rem;
+    display: none; /* Výchozí - skryté, zobrazí se pouze pro enabled providery */
 }
 
 .api-key-group label {
@@ -777,12 +817,45 @@ body {
 }
 
 .footer-link {
-    color: inherit;
+    color: var(--primary-color);
     text-decoration: none;
+    transition: all 0.2s ease;
 }
 
 .footer-link:hover {
+    color: var(--primary-hover);
     text-decoration: underline;
+}
+
+.footer-link strong {
+    font-weight: 600;
+}
+
+/* Theme-specific footer link colors */
+.theme-google .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-google .footer-link:hover {
+    color: var(--primary-hover);
+}
+
+.theme-replit .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-replit .footer-link:hover {
+    color: var(--primary-hover);
+    text-shadow: 0 0 8px var(--primary-color);
+}
+
+.theme-carrd .footer-link {
+    color: var(--primary-color);
+}
+
+.theme-carrd .footer-link:hover {
+    color: var(--primary-hover);
+    text-shadow: 0 0 10px var(--primary-color);
 }
 
 /* === ABOUT SECTION === */
@@ -930,6 +1003,16 @@ body {
     .footer-text {
         font-size: 0.8rem;
     }
+    
+    .modal-footer-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .cancel-button,
+    .save-button {
+        flex: 1;
+    }
 }
 
 @media (max-width: 480px) {
@@ -961,181 +1044,4 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
-}
-/* Přidat tyto styly do style.css */
-
-/* === FOOTER UPDATES === */
-.footer-separator {
-    color: var(--text-muted);
-    margin: 0 0.5rem;
-    font-size: 0.875rem;
-}
-
-/* === MODAL FOOTER UPDATES === */
-.modal-footer-buttons {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.cancel-button {
-    padding: 0.875rem 2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel-button:hover {
-    background: var(--surface-hover);
-    border-color: var(--text-secondary);
-}
-
-/* === SELECT OPTGROUP STYLING === */
-.settings-select optgroup {
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.settings-select option {
-    font-weight: 400;
-    padding: 0.5rem;
-}
-
-.settings-select option:disabled {
-    color: var(--text-muted);
-    font-style: italic;
-}
-
-/* === RESPONSIVE UPDATES === */
-@media (max-width: 768px) {
-    .modal-footer-buttons {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .cancel-button,
-    .save-button {
-        flex: 1;
-    }
-    
-    .footer-content {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .footer-separator {
-        display: none;
-    }
-}
-/* Přidat tyto styly do style.css */
-
-/* === FOOTER UPDATES === */
-.footer-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.footer-link:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
-}
-
-.footer-link strong {
-    font-weight: 600;
-}
-
-/* Theme-specific footer link colors */
-.theme-google .footer-link {
-    color: var(--primary-color);
-}
-
-.theme-google .footer-link:hover {
-    color: var(--primary-hover);
-}
-
-.theme-replit .footer-link {
-    color: var(--primary-color);
-}
-
-.theme-replit .footer-link:hover {
-    color: var(--primary-hover);
-    text-shadow: 0 0 8px var(--primary-color);
-}
-
-.theme-carrd .footer-link {
-    color: var(--primary-color);
-}
-
-.theme-carrd .footer-link:hover {
-    color: var(--primary-hover);
-    text-shadow: 0 0 10px var(--primary-color);
-}
-
-/* === MODAL FOOTER UPDATES === */
-.modal-footer-buttons {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.cancel-button {
-    padding: 0.875rem 2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text-primary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel-button:hover {
-    background: var(--surface-hover);
-    border-color: var(--text-secondary);
-}
-
-/* === SELECT OPTGROUP STYLING === */
-.settings-select optgroup {
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--surface);
-}
-
-.settings-select option {
-    font-weight: 400;
-    padding: 0.5rem;
-}
-
-.settings-select option:disabled {
-    color: var(--text-muted);
-    font-style: italic;
-}
-
-/* === API KEY GROUP VISIBILITY === */
-.api-key-group {
-    display: none; /* Výchozí - skryté, zobrazí se pouze pro enabled providery */
-}
-
-/* === RESPONSIVE UPDATES === */
-@media (max-width: 768px) {
-    .modal-footer-buttons {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .cancel-button,
-    .save-button {
-        flex: 1;
-    }
-    
-    .footer-content {
-        text-align: center;
-    }
 }
