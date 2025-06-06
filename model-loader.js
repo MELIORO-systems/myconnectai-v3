@@ -43,8 +43,13 @@ class ModelLoader {
     async loadModelsFromRegistry() {
         console.log('📦 Loading models from registry...');
         
+        // Ověřit dostupnost závislostí
         if (!window.ModelsRegistryHelper) {
             throw new Error('ModelsRegistryHelper not available');
+        }
+        
+        if (!window.modelManager) {
+            throw new Error('Model Manager not available - must be initialized first');
         }
         
         const enabledModels = ModelsRegistryHelper.getEnabledModels();
@@ -60,14 +65,10 @@ class ModelLoader {
                 
                 if (modelInstance) {
                     // Registruj model v Model Manageru
-                    if (window.modelManager) {
-                        window.modelManager.registerModel(modelDef.id, modelInstance);
-                        this.loadedModels.set(modelDef.id, modelDef);
-                        successCount++;
-                        console.log(`✅ Loaded model: ${modelDef.id}`);
-                    } else {
-                        throw new Error('Model Manager not available');
-                    }
+                    window.modelManager.registerModel(modelDef.id, modelInstance);
+                    this.loadedModels.set(modelDef.id, modelDef);
+                    successCount++;
+                    console.log(`✅ Loaded model: ${modelDef.id}`);
                 } else {
                     throw new Error(`Failed to create instance for model: ${modelDef.id}`);
                 }
