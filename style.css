@@ -1081,7 +1081,66 @@ body {
     }
 }
 
-/* === UTILITIES === */
+/* === SECURITY INFO === */
+.security-info {
+    background: rgba(26, 115, 232, 0.08);
+    border: 1px solid rgba(26, 115, 232, 0.2);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.theme-replit .security-info,
+.theme-carrd .security-info {
+    background: rgba(0, 217, 217, 0.1);
+    border-color: rgba(0, 217, 217, 0.3);
+}
+
+.security-text {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.security-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.security-link:hover {
+    text-decoration: underline;
+}
+
+/* Security Modal */
+.security-modal-content {
+    max-width: 700px;
+}
+
+.security-feature {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.security-feature:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.security-feature h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.security-feature p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
 .hidden {
     display: none;
 }
