@@ -88,26 +88,57 @@ class SettingsManager {
             await window.modelManager.initialize();
         }
 
-        // Získat dostupné modely
-        const models = window.modelManager.getAvailableModels();
+        // Získat VŠECHNY modely (včetně neviditelných)
+        const allModels = window.modelManager.getAllModels();
         const activeModel = window.modelManager.getActiveModel();
 
         // Vyčistit loading option
         select.innerHTML = '';
-
-        // Přidat modely do selectu
-        models.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model.id;
-            option.textContent = `${model.name} ${model.hasApiKey ? '✅' : '❌'}`;
-            option.disabled = !model.hasApiKey;
-            
-            if (activeModel && activeModel.id === model.id) {
-                option.selected = true;
-                this.selectedModel = model.id;
+        
+        // Seskupit modely podle providera
+        const modelsByProvider = {
+            openai: [],
+            anthropic: [],
+            google: []
+        };
+        
+        // Filtrovat pouze ENABLED modely z registry
+        allModels.forEach(model => {
+            // Získat model definition z registry
+            const modelDef = window.ModelsRegistryHelper?.getModelById(model.id);
+            if (modelDef && modelDef.enabled) {
+                if (modelsByProvider[model.provider]) {
+                    modelsByProvider[model.provider].push(model);
+                }
             }
-            
-            select.appendChild(option);
+        });
+
+        // Přidat modely do selectu po providerech
+        Object.entries(modelsByProvider).forEach(([provider, models]) => {
+            if (models.length > 0) {
+                // Přidat optgroup pro providera
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = provider.charAt(0).toUpperCase() + provider.slice(1);
+                
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = `${model.name} ${model.hasApiKey ? '✅' : '❌'}`;
+                    
+                    // Povolit pouze pokud má API klíč NEBO je aktivní
+                    const isActive = activeModel && activeModel.id === model.id;
+                    option.disabled = !model.hasApiKey && !isActive;
+                    
+                    if (isActive) {
+                        option.selected = true;
+                        this.selectedModel = model.id;
+                    }
+                    
+                    optgroup.appendChild(option);
+                });
+                
+                select.appendChild(optgroup);
+            }
         });
 
         // Event listener
