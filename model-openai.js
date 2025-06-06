@@ -42,8 +42,9 @@ class OpenAIModel {
 
     // Poslat zprávu s vylepšeným error handling a timeout
     async sendMessage(messages, options = {}) {
-        // Získat API klíč
-        const apiKey = options.apiKey || await window.modelManager?.getApiKey('openai');
+        // Získat API klíč - ošetřit prázdný string
+        const apiKey = (options.apiKey && options.apiKey.trim()) || 
+                       await window.modelManager?.getApiKey('openai');
         
         if (!apiKey) {
             throw new window.ConfigurationError(
