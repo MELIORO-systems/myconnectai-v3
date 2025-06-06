@@ -1,5 +1,5 @@
 // OpenAI Model Implementation
-// Verze: 2.1 - S timeout a vylepšeným error handling
+// Verze: 3.0 - S konzistentními českými error messages
 
 class OpenAIModel {
     constructor(modelId, modelDef) {
@@ -47,7 +47,7 @@ class OpenAIModel {
         
         if (!apiKey) {
             throw new window.ConfigurationError(
-                'OpenAI API key not configured',
+                'OpenAI API klíč není nakonfigurován',
                 'NO_API_KEY'
             );
         }
@@ -100,10 +100,10 @@ class OpenAIModel {
                 console.error('OpenAI API error:', data);
                 this.stats.errors++;
                 
-                // Vytvořit specifickou chybu
+                // Vytvořit specifickou chybu s českými hláškami
                 if (response.status === 401) {
                     throw new window.APIError(
-                        'Invalid API key',
+                        'Neplatný API klíč',
                         401,
                         'openai'
                     );
@@ -111,14 +111,27 @@ class OpenAIModel {
                     // Extrahovat informace o rate limitu
                     const retryAfter = response.headers.get('Retry-After');
                     throw new window.APIError(
-                        `Rate limit exceeded${retryAfter ? `. Retry after ${retryAfter}s` : ''}`,
+                        `Překročen limit požadavků${retryAfter ? `. Zkuste to za ${retryAfter} sekund` : ''}`,
                         429,
                         'openai'
                     );
                 } else if (response.status === 503) {
                     throw new window.APIError(
-                        'OpenAI service temporarily unavailable',
+                        'Služba OpenAI je dočasně nedostupná',
                         503,
+                        'openai'
+                    );
+                } else if (response.status === 400) {
+                    // Specifické chyby pro 400
+                    if (data.error?.message?.includes('context_length_exceeded')) {
+                        throw new window.ModelError(
+                            'Zpráva je příliš dlouhá pro tento model',
+                            'CONTEXT_LENGTH_EXCEEDED'
+                        );
+                    }
+                    throw new window.APIError(
+                        data.error?.message || 'Neplatný požadavek',
+                        400,
                         'openai'
                     );
                 } else if (data.error?.message) {
@@ -129,7 +142,7 @@ class OpenAIModel {
                     );
                 } else {
                     throw new window.APIError(
-                        `API error: ${response.status}`,
+                        `Chyba API: ${response.status}`,
                         response.status,
                         'openai'
                     );
@@ -139,7 +152,7 @@ class OpenAIModel {
             // Validovat odpověď
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
                 throw new window.ModelError(
-                    'Invalid response format from OpenAI',
+                    'Neplatný formát odpovědi od OpenAI',
                     'INVALID_RESPONSE'
                 );
             }
@@ -161,9 +174,9 @@ class OpenAIModel {
             // Převést AbortError na timeout error
             if (error.name === 'AbortError') {
                 throw new window.ModelError(
-                    'Request timeout - OpenAI is taking too long to respond',
+                    'Požadavek vypršel - OpenAI server neodpovídá',
                     'TIMEOUT',
-                    { timeout: CONFIG.API.TIMEOUT }
+                    { timeout: options.timeout || CONFIG.API.TIMEOUT }
                 );
             }
             
@@ -175,14 +188,14 @@ class OpenAIModel {
             // Network errors
             if (error.message?.includes('Failed to fetch')) {
                 throw new window.ModelError(
-                    'Network error - unable to connect to OpenAI',
+                    'Chyba sítě - nelze se připojit k OpenAI',
                     'NETWORK_ERROR'
                 );
             }
             
             // Ostatní chyby
             throw new window.ModelError(
-                error.message || 'Unknown error',
+                error.message || 'Neznámá chyba',
                 'UNKNOWN_ERROR',
                 { originalError: error.toString() }
             );
@@ -227,4 +240,4 @@ class OpenAIModel {
 // Export pro globální použití
 window.OpenAIModel = OpenAIModel;
 
-console.log('📦 OpenAI Model implementation loaded');
+console.log('📦 OpenAI Model implementation loaded (v3.0 - Fixed)');
