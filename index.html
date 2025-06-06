@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MyConnectAI v3 - Multi-Model AI Chat aplikace">
     <title>MyConnectAI v3 - Multi-Model Chat</title>
     
     <!-- Styly -->
@@ -143,11 +144,11 @@
     
     <!-- 4. Model implementace -->
     <script src="model-openai.js"></script>
-    <script src="model-perplexity.js"></script>  <!-- nové -->
-    <script src="model-together.js"></script>    <!-- nové -->
-    <script src="model-cohere.js"></script>      <!-- nové -->
-    <!-- Budoucí modely:
     <script src="model-claude.js"></script>
+    <script src="model-perplexity.js"></script>
+    <script src="model-together.js"></script>
+    <script src="model-cohere.js"></script>
+    <!-- Budoucí modely:
     <script src="model-gemini.js"></script>
     -->
     
@@ -214,6 +215,10 @@
                 'Security': window.security,
                 'Models Registry': window.MODELS_REGISTRY,
                 'OpenAI Model': window.OpenAIModel,
+                'Anthropic Model': window.AnthropicModel,
+                'Perplexity Model': window.PerplexityModel,
+                'Together Model': window.TogetherModel,
+                'Cohere Model': window.CohereModel,
                 'Model Manager': window.modelManager,
                 'Model Loader': window.modelLoader,
                 'UI Manager': window.uiManager,
@@ -228,6 +233,36 @@
             
             console.log('🚀 MyConnectAI v3 loaded');
         });
+        
+        // Noscript fallback
+        window.addEventListener('load', function() {
+            // Pokud JS nefunguje správně, zobrazit zprávu
+            setTimeout(function() {
+                const chatMessages = document.getElementById('chat-messages');
+                if (chatMessages && !window.modelManager) {
+                    chatMessages.innerHTML = `
+                        <div class="welcome-container">
+                            <div class="welcome-content">
+                                <h2 class="welcome-title">Chyba načítání</h2>
+                                <p class="welcome-subtitle">Aplikace se nepodařilo správně načíst. Zkuste prosím obnovit stránku.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }, 5000);
+        });
     </script>
+    
+    <!-- Noscript fallback -->
+    <noscript>
+        <style>
+            .chat-container { display: none; }
+        </style>
+        <div style="padding: 2rem; text-align: center; font-family: sans-serif;">
+            <h1>JavaScript je vyžadován</h1>
+            <p>Tato aplikace vyžaduje JavaScript pro správné fungování.</p>
+            <p>Prosím povolte JavaScript ve vašem prohlížeči a obnovte stránku.</p>
+        </div>
+    </noscript>
 </body>
 </html>
