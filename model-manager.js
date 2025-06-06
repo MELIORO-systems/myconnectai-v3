@@ -1,5 +1,5 @@
 // Model Manager - Centrální správa AI modelů
-// Verze: 2.0 - S vylepšeným error handling a async operacemi
+// Verze: 3.0 - Opravená verze bez duplikací, plně async
 
 // Custom error classes
 class ModelError extends Error {
@@ -31,6 +31,8 @@ class ModelManager {
         this.activeModel = null;
         this.initialized = false;
         this.initPromise = null;
+        // Cache pro API klíče
+        this.apiKeyCache = new Map();
     }
 
     // Registrace modelu
@@ -153,39 +155,48 @@ class ModelManager {
             return false;
         }
         
+        // Zkontrolovat cache
+        if (this.apiKeyCache.has(provider)) {
+            return this.apiKeyCache.get(provider);
+        }
+        
+        let hasKey = false;
         switch (provider) {
             case 'openai':
-                return !!(await security.loadSecure(CONFIG.STORAGE.KEYS.OPENAI_KEY));
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.OPENAI_KEY));
+                break;
             case 'anthropic':
-                return !!(await security.loadSecure(CONFIG.STORAGE.KEYS.ANTHROPIC_KEY));
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.ANTHROPIC_KEY));
+                break;
             case 'google':
-                return !!(await security.loadSecure(CONFIG.STORAGE.KEYS.GOOGLE_KEY));
-            default:
-                return false;
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.GOOGLE_KEY));
+                break;
         }
+        
+        // Uložit do cache
+        this.apiKeyCache.set(provider, hasKey);
+        return hasKey;
     }
 
-    // Synchronní verze pro zpětnou kompatibilitu
-    checkApiKey(provider) {
-        // Pro kompatibilitu - vrací false pokud security není ready
+    // Rychlá kontrola existence klíče (bez dešifrování)
+    hasApiKeyCached(provider) {
         if (!window.security || !window.security.initialized) {
             return false;
         }
         
-        // Používat cached hodnoty z localStorage přímo
         switch (provider) {
             case 'openai':
-                return !!localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_KEY);
+                return security.hasKey(CONFIG.STORAGE.KEYS.OPENAI_KEY);
             case 'anthropic':
-                return !!localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
+                return security.hasKey(CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
             case 'google':
-                return !!localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+                return security.hasKey(CONFIG.STORAGE.KEYS.GOOGLE_KEY);
             default:
                 return false;
         }
     }
 
-    // Získat API klíč pro providera - async verze
+    // Získat API klíč pro providera
     async getApiKey(provider) {
         if (!window.security || !window.security.initialized) {
             return null;
@@ -203,10 +214,13 @@ class ModelManager {
         }
     }
 
-    // Synchronní verze pro zpětnou kompatibilitu
-    getApiKey(provider) {
-        console.warn('DEPRECATED: Sync getApiKey is deprecated. Use async version.');
-        return null;
+    // Invalidovat cache při změně klíčů
+    invalidateApiKeyCache(provider = null) {
+        if (provider) {
+            this.apiKeyCache.delete(provider);
+        } else {
+            this.apiKeyCache.clear();
+        }
     }
 
     // Získat aktivní model
@@ -240,48 +254,31 @@ class ModelManager {
 
         console.log(`💬 Sending message via ${this.activeModel}`);
         
-        // Timeout wrapper
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => {
-                reject(new ModelError('Request timeout', 'TIMEOUT', { 
-                    timeout: CONFIG.API.TIMEOUT 
-                }));
-            }, CONFIG.API.TIMEOUT || 30000);
-        });
-        
         try {
-            // Race mezi API voláním a timeoutem
-            const response = await Promise.race([
-                model.sendMessage(messages, {
-                    ...options,
-                    apiKey: apiKey
-                }),
-                timeoutPromise
-            ]);
+            const response = await model.sendMessage(messages, {
+                ...options,
+                apiKey: apiKey,
+                timeout: CONFIG.API.TIMEOUT || 30000
+            });
             
             return response;
             
         } catch (error) {
             console.error(`❌ Model error (${this.activeModel}):`, error);
             
-            // Převést na standardizovanou chybu
-            if (error instanceof ModelError) {
-                throw error;
-            } else if (error.message?.includes('Neplatný API klíč')) {
-                throw new APIError('Invalid API key', 401, model.provider);
-            } else if (error.message?.includes('Překročen limit')) {
-                throw new APIError('Rate limit exceeded', 429, model.provider);
-            } else if (error.message?.includes('Failed to fetch')) {
-                throw new ModelError('Network connection error', 'NETWORK_ERROR');
-            } else {
-                throw new ModelError(error.message || 'Unknown error', 'UNKNOWN_ERROR');
+            // Pokud je povolený fallback a není to už fallback pokus
+            if (options.allowFallback !== false && CONFIG.MODELS.FALLBACK_CHAIN?.length > 0) {
+                return await this.tryFallbackModel(messages, options, error);
             }
+            
+            // Jinak vyhodit chybu
+            throw error;
         }
     }
 
-    // Fallback strategie - zachováno pro kompatibilitu
+    // Fallback strategie
     async tryFallbackModel(messages, options, originalError) {
-        const fallbackChain = window.CONFIG?.MODELS?.FALLBACK_CHAIN || [];
+        const fallbackChain = CONFIG.MODELS.FALLBACK_CHAIN || [];
         
         for (const fallbackId of fallbackChain) {
             if (fallbackId === this.activeModel) continue; // Skip failed model
@@ -313,7 +310,7 @@ class ModelManager {
                     // Přidat informaci o fallbacku
                     return `[Použit záložní model: ${fallbackId}]\n\n${response}`;
                 } catch (fallbackError) {
-                    console.error(`❌ Fallback failed: ${fallbackId}`);
+                    console.error(`❌ Fallback failed: ${fallbackId}`, fallbackError);
                     continue;
                 }
             }
@@ -323,8 +320,8 @@ class ModelManager {
         throw originalError;
     }
 
-    // Získat informace o modelu - async verze
-    async getModelInfoAsync(modelId = null) {
+    // Získat informace o modelu
+    async getModelInfo(modelId = null) {
         const id = modelId || this.activeModel;
         const model = this.models.get(id);
         
@@ -343,8 +340,8 @@ class ModelManager {
         };
     }
 
-    // Synchronní verze pro kompatibilitu
-    getModelInfo(modelId = null) {
+    // Synchronní verze pro UI (používá cache)
+    getModelInfoSync(modelId = null) {
         const id = modelId || this.activeModel;
         const model = this.models.get(id);
         
@@ -359,32 +356,32 @@ class ModelManager {
             contextWindow: model.contextWindow || null,
             isActive: id === this.activeModel,
             visible: model.visible || false,
-            hasApiKey: this.checkApiKey(model.provider)
+            hasApiKey: this.hasApiKeyCached(model.provider)
         };
     }
 
-    // Získat seznam všech modelů - async verze
-    async getAvailableModelsAsync() {
+    // Získat seznam dostupných modelů
+    async getAvailableModels() {
         const models = [];
         
         for (const [id, model] of this.models) {
             // Vrátit pouze viditelné modely
             if (model.visible) {
-                models.push(await this.getModelInfoAsync(id));
+                models.push(await this.getModelInfo(id));
             }
         }
         
         return models;
     }
 
-    // Synchronní verze pro kompatibilitu
-    getAvailableModels() {
+    // Synchronní verze pro UI
+    getAvailableModelsSync() {
         const models = [];
         
         for (const [id, model] of this.models) {
             // Vrátit pouze viditelné modely
             if (model.visible) {
-                models.push(this.getModelInfo(id));
+                models.push(this.getModelInfoSync(id));
             }
         }
         
@@ -395,8 +392,8 @@ class ModelManager {
     getAllModels() {
         const models = [];
         
-        for (const [id, model] of this.models) {
-            models.push(this.getModelInfo(id));
+        for (const [id] of this.models) {
+            models.push(this.getModelInfoSync(id));
         }
         
         return models;
@@ -428,7 +425,7 @@ class ModelManager {
             // Přepnout na první viditelný model
             const firstVisible = this.getFirstVisibleModel();
             if (firstVisible) {
-                this.setActiveModel(firstVisible.id);
+                this.setActiveModel(firstVisible.id).catch(console.error);
             }
         }
     }
@@ -448,7 +445,7 @@ class ModelManager {
         return false;
     }
 
-    // Test API klíče s timeout
+    // Test API klíče
     async testApiKey(provider, apiKey) {
         // Najít první model s daným providerem
         let testModel = null;
@@ -466,10 +463,6 @@ class ModelManager {
             );
         }
         
-        // Timeout pro test
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout pro test
-        
         try {
             // Zkusit jednoduchý test
             const response = await testModel.sendMessage([
@@ -477,27 +470,26 @@ class ModelManager {
             ], {
                 apiKey: apiKey,
                 maxTokens: 10,
-                signal: controller.signal
+                timeout: 10000 // 10s timeout pro test
             });
             
-            clearTimeout(timeout);
             return response && response.length > 0;
             
         } catch (error) {
-            clearTimeout(timeout);
             console.error(`API key test failed for ${provider}:`, error);
             
-            // Specifické chyby
-            if (error.name === 'AbortError') {
-                throw new ModelError('Test timeout', 'TEST_TIMEOUT');
+            // Specifické chyby indikující neplatný klíč
+            if (error instanceof APIError && error.details.statusCode === 401) {
+                return false;
             }
             
-            return false;
+            // Pro ostatní chyby (network, timeout) vyhodit chybu
+            throw error;
         }
     }
 
-    // Validovat konfiguraci - async verze
-    async validateConfigurationAsync() {
+    // Validovat konfiguraci
+    async validateConfiguration() {
         const issues = [];
         
         // Kontrola modelů
@@ -509,7 +501,7 @@ class ModelManager {
         }
         
         // Kontrola viditelných modelů
-        const visibleModels = await this.getAvailableModelsAsync();
+        const visibleModels = await this.getAvailableModels();
         if (visibleModels.length === 0) {
             issues.push({
                 type: 'error',
@@ -531,37 +523,13 @@ class ModelManager {
         return issues;
     }
 
-    // Synchronní verze pro kompatibilitu
-    validateConfiguration() {
-        const issues = [];
-        
-        // Kontrola modelů
-        if (this.models.size === 0) {
-            issues.push('No models registered');
-        }
-        
-        // Kontrola viditelných modelů
-        const visibleModels = this.getAvailableModels();
-        if (visibleModels.length === 0) {
-            issues.push('No visible models available');
-        }
-        
-        // Kontrola API klíčů pro viditelné modely
-        for (const model of visibleModels) {
-            if (!model.hasApiKey) {
-                issues.push(`Model ${model.name} has no API key`);
-            }
-        }
-        
-        return issues;
-    }
-
     // Cleanup metoda
     destroy() {
         this.models.clear();
         this.activeModel = null;
         this.initialized = false;
         this.initPromise = null;
+        this.apiKeyCache.clear();
         console.log('🧹 Model Manager destroyed');
     }
 }
@@ -574,4 +542,4 @@ window.ModelError = ModelError;
 window.APIError = APIError;
 window.ConfigurationError = ConfigurationError;
 
-console.log('📦 Model Manager loaded (with local API key storage)');
+console.log('📦 Model Manager loaded (v3.0 - Fixed)');
