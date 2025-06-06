@@ -171,6 +171,15 @@ class ModelManager {
             case 'google':
                 hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.GOOGLE_KEY));
                 break;
+            case 'perplexity':
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.PERPLEXITY_KEY));
+                break;
+            case 'together':
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.TOGETHER_KEY));
+                break;
+            case 'cohere':
+                hasKey = !!(await security.loadSecure(CONFIG.STORAGE.KEYS.COHERE_KEY));
+                break;
         }
         
         // Uložit do cache
@@ -191,6 +200,12 @@ class ModelManager {
                 return security.hasKey(CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
             case 'google':
                 return security.hasKey(CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+            case 'perplexity':
+                return security.hasKey(CONFIG.STORAGE.KEYS.PERPLEXITY_KEY);
+            case 'together':
+                return security.hasKey(CONFIG.STORAGE.KEYS.TOGETHER_KEY);
+            case 'cohere':
+                return security.hasKey(CONFIG.STORAGE.KEYS.COHERE_KEY);
             default:
                 return false;
         }
@@ -209,6 +224,12 @@ class ModelManager {
                 return await security.loadSecure(CONFIG.STORAGE.KEYS.ANTHROPIC_KEY);
             case 'google':
                 return await security.loadSecure(CONFIG.STORAGE.KEYS.GOOGLE_KEY);
+            case 'perplexity':
+                return await security.loadSecure(CONFIG.STORAGE.KEYS.PERPLEXITY_KEY);
+            case 'together':
+                return await security.loadSecure(CONFIG.STORAGE.KEYS.TOGETHER_KEY);
+            case 'cohere':
+                return await security.loadSecure(CONFIG.STORAGE.KEYS.COHERE_KEY);
             default:
                 return null;
         }
