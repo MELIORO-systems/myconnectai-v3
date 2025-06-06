@@ -20,18 +20,18 @@
                 <div class="header-subtitle">Multi-Model AI Assistant</div>
             </div>
             <div class="header-buttons">
-                <button class="action-button" onclick="if(window.uiManager) window.uiManager.showWelcomeScreen()" title="Znovu načíst chat">
+                <button class="action-button" onclick="if(window.uiManager) window.uiManager.showWelcomeScreen(); else console.error('UI Manager not ready');" title="Znovu načíst chat">
                     Reload
                 </button>
                 
                 <!-- Menu dropdown -->
                 <div class="dropdown">
-                    <button class="action-button menu-button" onclick="if(window.uiManager) window.uiManager.toggleMenu()">
+                    <button class="action-button menu-button" onclick="if(window.uiManager) window.uiManager.toggleMenu(); else console.error('UI Manager not ready');">
                         Menu ▼
                     </button>
                     <div class="dropdown-content" id="mainMenu">
-                        <a href="#" onclick="if(window.uiManager) window.uiManager.showAbout(); return false;">O projektu</a>
-                        <a href="#" onclick="if(window.settingsManager) window.settingsManager.open(); return false;">Nastavení</a>
+                        <a href="#" onclick="if(window.uiManager) window.uiManager.showAbout(); else console.error('UI Manager not ready'); return false;">O projektu</a>
+                        <a href="#" onclick="if(window.settingsManager) window.settingsManager.open(); else console.error('Settings Manager not ready'); return false;">Nastavení</a>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
         <!-- INPUT OBLAST -->
         <div class="chat-input-area" id="chat-input-area">
             <textarea id="chat-input" class="chat-input" placeholder="Napište svůj dotaz..." rows="1"></textarea>
-            <button id="send-button" class="send-button" onclick="sendMessage()">
+            <button id="send-button" class="send-button" onclick="if(window.sendMessage) sendMessage(); else console.error('Send message function not ready');">
                 Odeslat
             </button>
         </div>
@@ -71,7 +71,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Nastavení</h2>
-                <button class="close-button" onclick="if(window.settingsManager) window.settingsManager.close()">&times;</button>
+                <button class="close-button" onclick="if(window.settingsManager) window.settingsManager.close(); else console.error('Settings Manager not ready');">&times;</button>
             </div>
             
             <div class="modal-body">
@@ -103,10 +103,10 @@
                 <div class="settings-section">
                     <h3>Záloha konfigurace</h3>
                     <div class="export-import-buttons">
-                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.exportConfig()">
+                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.exportConfig(); else console.error('Settings Manager not ready');">
                             📤 Export nastavení
                         </button>
-                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.importConfig()">
+                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.importConfig(); else console.error('Settings Manager not ready');">
                             📥 Import nastavení
                         </button>
                     </div>
@@ -116,10 +116,10 @@
             <div class="modal-footer">
                 <div class="settings-status" id="settings-status"></div>
                 <div class="modal-footer-buttons">
-                    <button class="cancel-button" onclick="if(window.settingsManager) window.settingsManager.close()">
+                    <button class="cancel-button" onclick="if(window.settingsManager) window.settingsManager.close(); else console.error('Settings Manager not ready');">
                         Storno
                     </button>
-                    <button class="save-button" onclick="if(window.settingsManager) window.settingsManager.save()">
+                    <button class="save-button" onclick="if(window.settingsManager) window.settingsManager.save(); else console.error('Settings Manager not ready');">
                         Uložit nastavení
                     </button>
                 </div>
@@ -156,36 +156,49 @@
     
     <!-- 7. Finální inicializace -->
     <script>
+        // Globální error handler pro inline funkce
+        window.safeCall = function(fn, ...args) {
+            try {
+                if (typeof fn === 'function') {
+                    return fn(...args);
+                } else {
+                    console.error('Not a function:', fn);
+                }
+            } catch (error) {
+                console.error('Error in safe call:', error);
+            }
+        };
+        
         // Nastavit texty z konfigurace při načtení
         document.addEventListener('DOMContentLoaded', function() {
             // Nastavit texty z CONFIG
             if (window.CONFIG) {
                 // Titulek stránky
-                document.title = CONFIG.UI.PAGE_TITLE;
+                document.title = CONFIG.UI.PAGE_TITLE || 'MyConnectAI v3 - Multi-Model Chat';
                 
                 // Hlavička
                 const titleElement = document.querySelector('.header-logo-link');
                 const subtitleElement = document.querySelector('.header-subtitle');
-                if (titleElement) titleElement.textContent = CONFIG.UI.APP_TITLE;
-                if (subtitleElement) subtitleElement.textContent = CONFIG.UI.APP_SUBTITLE;
+                if (titleElement) titleElement.textContent = CONFIG.UI.APP_TITLE || 'MyConnectAI v3';
+                if (subtitleElement) subtitleElement.textContent = CONFIG.UI.APP_SUBTITLE || 'Multi-Model AI Assistant';
                 
                 // Reload button
                 const reloadButton = document.querySelector('.action-button[onclick*="showWelcomeScreen"]');
                 if (reloadButton) {
-                    reloadButton.textContent = CONFIG.UI.RELOAD_BUTTON_TEXT;
-                    reloadButton.title = CONFIG.UI.RELOAD_BUTTON_TOOLTIP;
+                    reloadButton.textContent = CONFIG.UI.RELOAD_BUTTON_TEXT || 'Reload';
+                    reloadButton.title = CONFIG.UI.RELOAD_BUTTON_TOOLTIP || 'Znovu načíst chat';
                 }
                 
                 // Input placeholder
                 const chatInput = document.getElementById('chat-input');
                 if (chatInput) {
-                    chatInput.placeholder = CONFIG.UI.INPUT_PLACEHOLDER;
+                    chatInput.placeholder = CONFIG.UI.INPUT_PLACEHOLDER || 'Napište svůj dotaz...';
                 }
                 
                 // Send button
                 const sendButton = document.getElementById('send-button');
                 if (sendButton) {
-                    sendButton.textContent = CONFIG.UI.SEND_BUTTON_TEXT;
+                    sendButton.textContent = CONFIG.UI.SEND_BUTTON_TEXT || 'Odeslat';
                 }
             }
             
