@@ -749,7 +749,12 @@ class SettingsManager {
 
             // Přidat API klíče pokud je to povoleno
             if (CONFIG.EXPORT.INCLUDE.API_KEYS) {
-                config.apiKeys = await window.security.exportSecureData(password);
+                const exportedData = await window.security.exportSecureData(password);
+                if (exportedData) {
+                    config.apiKeys = exportedData;
+                } else {
+                    console.warn('No encrypted data to export');
+                }
             }
 
             // Vytvořit blob a stáhnout
@@ -881,7 +886,133 @@ class SettingsManager {
         }
     }
 
-    // Zobrazit informace o zabezpečení
+    // Vymazat data
+    async clearData() {
+        // Vytvořit modal pro výběr dat k vymazání
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2>Vymazat data</h2>
+                    <button class="close-button" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <p>Vyberte data k vymazání:</p>
+                    <div style="margin: 1.5rem 0;">
+                        <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+                            <input type="checkbox" id="clear-api-keys" checked> API klíče
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+                            <input type="checkbox" id="clear-settings" checked> Nastavení modelů
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+                            <input type="checkbox" id="clear-theme" checked> Téma a preference
+                        </label>
+                        <label style="display: block; margin: 0.5rem 0; cursor: pointer;">
+                            <input type="checkbox" id="clear-device-key"> Šifrovací klíč (zachovat pro budoucí dešifrování)
+                        </label>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">
+                        Varování: Tato akce je nevratná!
+                    </p>
+                </div>
+                
+                <div class="modal-footer">
+                    <div class="modal-footer-buttons">
+                        <button class="cancel-button" onclick="this.closest('.modal').remove()">
+                            Zrušit
+                        </button>
+                        <button class="save-button" onclick="window.settingsManager.confirmClearData(this.closest('.modal'))">
+                            Vymazat vybraná data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Zavřít při kliknutí mimo
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+    
+    // Potvrzení a vymazání dat
+    async confirmClearData(modal) {
+        // Získat vybrané možnosti
+        const clearApiKeys = modal.querySelector('#clear-api-keys').checked;
+        const clearSettings = modal.querySelector('#clear-settings').checked;
+        const clearTheme = modal.querySelector('#clear-theme').checked;
+        const clearDeviceKey = modal.querySelector('#clear-device-key').checked;
+        
+        // Pokud nic není vybráno, zavřít
+        if (!clearApiKeys && !clearSettings && !clearTheme && !clearDeviceKey) {
+            modal.remove();
+            return;
+        }
+        
+        // Potvrzovací dialog
+        if (!confirm('Opravdu chcete vymazat vybraná data?\n\nTato akce je nevratná.')) {
+            return;
+        }
+        
+        try {
+            const prefix = CONFIG.STORAGE.PREFIX;
+            
+            // Vymazat API klíče
+            if (clearApiKeys && window.security) {
+                const apiKeys = [
+                    CONFIG.STORAGE.KEYS.OPENAI_KEY,
+                    CONFIG.STORAGE.KEYS.ANTHROPIC_KEY,
+                    CONFIG.STORAGE.KEYS.GOOGLE_KEY
+                ];
+                
+                for (const key of apiKeys) {
+                    window.security.removeSecure(key);
+                }
+                
+                // Invalidovat cache v model manageru
+                if (window.modelManager) {
+                    window.modelManager.invalidateApiKeyCache();
+                }
+            }
+            
+            // Vymazat nastavení modelů
+            if (clearSettings) {
+                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.SELECTED_MODEL);
+                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS);
+                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID);
+            }
+            
+            // Vymazat téma a preference
+            if (clearTheme) {
+                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.SELECTED_THEME);
+            }
+            
+            // Vymazat šifrovací klíč (nebezpečné!)
+            if (clearDeviceKey) {
+                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.DEVICE_KEY);
+            }
+            
+            // Zavřít modaly
+            modal.remove();
+            this.close();
+            
+            // Zobrazit zprávu a reload
+            alert('Data byla úspěšně vymazána.\n\nStránka se nyní znovu načte.');
+            window.location.reload();
+            
+        } catch (error) {
+            console.error('Error clearing data:', error);
+            this.showStatus('error', 'Chyba při mazání dat');
+        }
+    }
     showSecurityInfo() {
         // Vytvořit modal
         const modal = document.createElement('div');
