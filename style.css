@@ -353,8 +353,10 @@ body {
     border: 1px solid var(--border);
 }
 
-/* OPRAVA: Odstranit spodní mezeru u poslední sekce */
-.settings-section:last-child {
+/* OPRAVA: Odstranit spodní mezeru u poslední sekce v modal-body */
+.modal-body .settings-section:last-child,
+.modal-body > .settings-section:last-of-type,
+#providers-settings + .settings-section {
     margin-bottom: 0;
 }
 
