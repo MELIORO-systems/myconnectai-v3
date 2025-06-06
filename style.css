@@ -1,4 +1,5 @@
-/* MyConnectAI v2 - Kompletní styly */
+/* MyConnectAI v3 - Kompletní styly */
+/* S původními výraznými barvami z melioro.online */
 
 * {
     margin: 0;
@@ -8,20 +9,20 @@
 
 /* === COLOR SCHEMES === */
 :root {
-    /* Claude (Default) */
-    --primary-color: #C96442;
-    --primary-hover: #B45309;
-    --secondary-color: #78716C;
-    --success-color: #16A34A;
-    --warning-color: #EAB308;
-    --error-color: #DC2626;
-    --background: #FAF9F5;
-    --surface: #F0EEE6;
-    --surface-hover: #E8E5DD;
-    --border: #E2DFD7;
-    --text-primary: #2D2A26;
-    --text-secondary: #6B6B6B;
-    --text-muted: #9CA3AF;
+    /* Claude (Default) - světlé béžové */
+    --primary-color: #D97757;
+    --primary-hover: #C96442;
+    --secondary-color: #8B7355;
+    --success-color: #52A373;
+    --warning-color: #E5A50A;
+    --error-color: #DC3545;
+    --background: #FBF9F4;
+    --surface: #F5F2ED;
+    --surface-hover: #EDE9E3;
+    --border: #E5E1DB;
+    --text-primary: #2C2416;
+    --text-secondary: #6B5D4F;
+    --text-muted: #A09383;
     --shadow-sm: 0 1px 2px 0 rgb(45 42 38 / 0.05);
     --shadow: 0 1px 3px 0 rgb(45 42 38 / 0.1), 0 1px 2px -1px rgb(45 42 38 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(45 42 38 / 0.1), 0 4px 6px -4px rgb(45 42 38 / 0.1);
@@ -29,58 +30,80 @@
     --radius-lg: 0.75rem;
 }
 
-/* Google theme */
+/* Google theme - čistě bílé */
 .theme-google {
     --primary-color: #1a73e8;
     --primary-hover: #1557b0;
+    --secondary-color: #5f6368;
+    --success-color: #137333;
+    --warning-color: #f29900;
+    --error-color: #d33b27;
+    --background: #ffffff;
+    --surface: #f8f9fa;
+    --surface-hover: #f1f3f4;
     --border: #dadce0;
     --text-primary: #202124;
     --text-secondary: #5f6368;
     --text-muted: #80868b;
-    --success-color: #137333;
-    --warning-color: #f29900;
-    --error-color: #d93025;
-    --background: #ffffff;
-    --surface: #f8f9fa;
-    --surface-hover: #f1f3f4;
+    --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+    --shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+    --shadow-lg: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
 }
 
-/* Replit theme */
+/* Replit theme - opravdu tmavé */
 .theme-replit {
-    --background: #0e1525;
-    --surface: #1c2333;
-    --surface-hover: #2d3748;
-    --border: #3a4553;
-    --text-primary: #f7fafc;
-    --text-secondary: #a0aec0;
-    --text-muted: #718096;
-    --primary-color: #f56565;
-    --primary-hover: #e53e3e;
-    --success-color: #48bb78;
-    --warning-color: #ed8936;
-    --error-color: #f56565;
+    --primary-color: #F26207;
+    --primary-hover: #E55100;
+    --secondary-color: #6BB6FF;
+    --success-color: #21C55E;
+    --warning-color: #F59E0B;
+    --error-color: #EF4444;
+    --background: #0D1117;
+    --surface: #161B22;
+    --surface-hover: #21262D;
+    --border: #30363D;
+    --text-primary: #F0F6FC;
+    --text-secondary: #8B949E;
+    --text-muted: #6E7681;
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.5);
+    --shadow: 0 1px 3px 0 rgba(0,0,0,0.7), 0 1px 2px -1px rgba(0,0,0,0.7);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.7), 0 4px 6px -4px rgba(0,0,0,0.7);
 }
 
-/* Carrd theme */
+/* Carrd theme - neonové futuristické */
 .theme-carrd {
-    --primary-color: #00d9d9;
-    --primary-hover: #00ffff;
-    --secondary-color: #ff0080;
-    --success-color: #00d084;
-    --warning-color: #ffb900;
-    --error-color: #ff0080;
-    --background: #0d0f11;
-    --surface: #1a1d21;
-    --surface-hover: #242830;
-    --border: #2a2d35;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
+    --primary-color: #00D9FF;
+    --primary-hover: #00B8E6;
+    --secondary-color: #FF0080;
+    --success-color: #00FF88;
+    --warning-color: #FFB800;
+    --error-color: #FF0040;
+    --background: #000000;
+    --surface: #0A0A0A;
+    --surface-hover: #141414;
+    --border: #1F1F1F;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
     --text-muted: #666666;
-    --shadow-sm: 0 2px 8px rgba(0, 217, 217, 0.1);
-    --shadow: 0 4px 16px rgba(0, 217, 217, 0.2);
-    --shadow-lg: 0 8px 32px rgba(0, 217, 217, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 217, 255, 0.2);
+    --shadow: 0 4px 16px rgba(0, 217, 255, 0.3);
+    --shadow-lg: 0 8px 32px rgba(0, 217, 255, 0.4);
     --radius: 0.75rem;
     --radius-lg: 1rem;
+}
+
+/* Carrd theme - speciální efekty */
+.theme-carrd .primary-btn,
+.theme-carrd .send-button,
+.theme-carrd .save-button {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
+}
+
+.theme-carrd .primary-btn:hover,
+.theme-carrd .send-button:hover,
+.theme-carrd .save-button:hover {
+    box-shadow: 0 6px 30px rgba(0, 217, 255, 0.6);
 }
 
 body {
@@ -240,6 +263,11 @@ body {
     animation: fadeIn 0.2s ease;
 }
 
+.theme-replit .modal,
+.theme-carrd .modal {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -340,36 +368,39 @@ body {
 
 /* === SETTINGS SECTIONS === */
 .settings-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
 }
 
 .settings-section:last-child {
-    border-bottom: none;
     margin-bottom: 0;
-    padding-bottom: 0;
 }
 
 .settings-section h3 {
     margin: 0 0 1rem 0;
     font-size: 1.1rem;
     color: var(--text-primary);
+    font-weight: 600;
 }
 
-/* Provider sections */
+/* Provider sections - už mají vlastní styl, jen upravíme */
 .provider-section {
     background: var(--surface);
     border-radius: var(--radius);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
 }
 
 .provider-section h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 0.75rem;
     border-bottom: 2px solid var(--primary-color);
+    font-weight: 600;
 }
 
 /* Model specific settings */
@@ -382,9 +413,10 @@ body {
 }
 
 .model-settings-group h4 {
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .setting-item {
@@ -400,6 +432,7 @@ body {
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: var(--text-primary);
+    font-size: 0.875rem;
 }
 
 .setting-item small {
@@ -427,6 +460,10 @@ body {
     box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
 }
 
+.theme-carrd .settings-select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+}
+
 .settings-select optgroup {
     font-weight: 600;
     color: var(--text-secondary);
@@ -447,6 +484,7 @@ body {
 .theme-selector {
     display: flex;
     gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 .theme-btn {
@@ -470,7 +508,7 @@ body {
 }
 
 .theme-claude {
-    background: linear-gradient(135deg, #FAF9F5 0%, #F0EEE6 100%);
+    background: linear-gradient(135deg, #FBF9F4 0%, #D97757 100%);
 }
 
 .theme-google {
@@ -478,17 +516,17 @@ body {
 }
 
 .theme-replit {
-    background: linear-gradient(135deg, #0e1525 0%, #f56565 100%);
+    background: linear-gradient(135deg, #0D1117 0%, #F26207 100%);
 }
 
 .theme-carrd {
-    background: linear-gradient(135deg, #00d9d9 0%, #0d0f11 100%);
+    background: linear-gradient(135deg, #000000 0%, #00D9FF 100%);
 }
 
 /* API Key Inputs */
 .api-key-group {
     margin-bottom: 1.5rem;
-    display: none; /* Výchozí - skryté, zobrazí se pouze pro enabled providery */
+    display: block;
 }
 
 .api-key-group label {
@@ -496,6 +534,7 @@ body {
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: var(--text-primary);
+    font-size: 0.875rem;
 }
 
 .input-group {
@@ -507,6 +546,7 @@ body {
 .api-key-input,
 .settings-input {
     flex: 1;
+    width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -520,6 +560,11 @@ body {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
+}
+
+.theme-carrd .api-key-input:focus,
+.theme-carrd .settings-input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
 }
 
 .toggle-btn,
@@ -558,25 +603,27 @@ body {
 
 /* Export/Import Buttons */
 .export-import-buttons {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
 .action-btn {
-    flex: 1;
     padding: 0.875rem 1.25rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--surface);
+    background: var(--background);
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .action-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
+    transform: translateY(-1px);
 }
 
 /* Save Button */
@@ -689,6 +736,11 @@ body {
     max-width: 95%;
     font-style: italic;
     border: 1px solid rgba(201, 100, 66, 0.2);
+}
+
+.theme-carrd .system-message {
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
 }
 
 .error-message {
@@ -811,6 +863,10 @@ body {
     box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
 }
 
+.theme-carrd .chat-input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+}
+
 .chat-input::placeholder {
     color: var(--text-muted);
 }
@@ -884,30 +940,14 @@ body {
 }
 
 /* Theme-specific footer link colors */
-.theme-google .footer-link {
-    color: var(--primary-color);
-}
-
-.theme-google .footer-link:hover {
-    color: var(--primary-hover);
-}
-
-.theme-replit .footer-link {
-    color: var(--primary-color);
-}
-
-.theme-replit .footer-link:hover {
-    color: var(--primary-hover);
-    text-shadow: 0 0 8px var(--primary-color);
-}
-
 .theme-carrd .footer-link {
     color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color);
 }
 
 .theme-carrd .footer-link:hover {
     color: var(--primary-hover);
-    text-shadow: 0 0 10px var(--primary-color);
+    text-shadow: 0 0 20px var(--primary-color);
 }
 
 /* === ABOUT SECTION === */
@@ -1039,7 +1079,7 @@ body {
     }
     
     .export-import-buttons {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
     
     .app-footer {
@@ -1091,10 +1131,14 @@ body {
     font-size: 0.875rem;
 }
 
-.theme-replit .security-info,
+.theme-replit .security-info {
+    background: rgba(242, 98, 7, 0.1);
+    border-color: rgba(242, 98, 7, 0.3);
+}
+
 .theme-carrd .security-info {
-    background: rgba(0, 217, 217, 0.1);
-    border-color: rgba(0, 217, 217, 0.3);
+    background: rgba(0, 217, 255, 0.1);
+    border-color: rgba(0, 217, 255, 0.3);
 }
 
 .security-text {
@@ -1141,6 +1185,8 @@ body {
     line-height: 1.6;
     margin: 0;
 }
+
+/* === UTILITY CLASSES === */
 .hidden {
     display: none;
 }
@@ -1155,4 +1201,62 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* === SCROLLBAR STYLING === */
+/* Webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--background);
+}
+
+/* === SPECIAL EFFECTS FOR CARRD THEME === */
+.theme-carrd .chat-header,
+.theme-carrd .modal-header,
+.theme-carrd .app-footer {
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 217, 255, 0.05) 100%);
+}
+
+.theme-carrd .message:hover {
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.2);
+}
+
+.theme-carrd .action-button:hover,
+.theme-carrd .example-query:hover {
+    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+}
+
+/* === LOADING ANIMATION === */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
 }
