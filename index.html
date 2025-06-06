@@ -94,50 +94,9 @@
                     </div>
                 </div>
                 
-                <!-- API klíče -->
-                <div class="settings-section">
-                    <h3>API Klíče</h3>
-                    
-                    <div class="api-key-group" id="openai-api-group">
-                        <label>OpenAI API Key</label>
-                        <div class="input-group">
-                            <input type="password" id="openai-api-key" placeholder="sk-..." class="api-key-input">
-                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('openai-api-key')">Zobrazit</button>
-                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('openai')">Test</button>
-                        </div>
-                        <small>Získejte na <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></small>
-                    </div>
-                    
-                    <div class="api-key-group" id="anthropic-api-group">
-                        <label>Anthropic API Key (Claude)</label>
-                        <div class="input-group">
-                            <input type="password" id="anthropic-api-key" placeholder="sk-ant-..." class="api-key-input">
-                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('anthropic-api-key')">Zobrazit</button>
-                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('anthropic')">Test</button>
-                        </div>
-                        <small>Získejte na <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></small>
-                    </div>
-                    
-                    <div class="api-key-group" id="google-api-group">
-                        <label>Google API Key (Gemini)</label>
-                        <div class="input-group">
-                            <input type="password" id="google-api-key" placeholder="AIza..." class="api-key-input">
-                            <button class="toggle-btn" onclick="if(window.uiManager) window.uiManager.toggleVisibility('google-api-key')">Zobrazit</button>
-                            <button class="test-btn" onclick="if(window.settingsManager) window.settingsManager.testApiKey('google')">Test</button>
-                        </div>
-                        <small>Získejte na <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></small>
-                    </div>
-                </div>
-                
-                <!-- Specifická nastavení -->
-                <div class="settings-section" id="model-specific-settings">
-                    <h3>Specifická nastavení modelu</h3>
-                    
-                    <div id="openai-settings" style="display: none;">
-                        <label>OpenAI Assistant ID (pro Agent mode)</label>
-                        <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input">
-                        <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
-                    </div>
+                <!-- Hierarchická nastavení providerů -->
+                <div id="providers-settings">
+                    <!-- Dynamicky generované sekce pro každého enabled providera -->
                 </div>
                 
                 <!-- Export/Import -->
