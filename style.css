@@ -510,19 +510,19 @@ body {
     box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.15);
 }
 
-.theme-claude {
+.theme-btn.theme-claude {
     background: linear-gradient(135deg, #FAF9F5 0%, #F0EEE6 100%);
 }
 
-.theme-google {
+.theme-btn.theme-google {
     background: linear-gradient(135deg, #ffffff 0%, #1a73e8 100%);
 }
 
-.theme-replit {
+.theme-btn.theme-replit {
     background: linear-gradient(135deg, #0e1525 0%, #f56565 100%);
 }
 
-.theme-carrd {
+.theme-btn.theme-carrd {
     background: linear-gradient(135deg, #00d9d9 0%, #0d0f11 100%);
 }
 
