@@ -142,7 +142,20 @@ class SettingsManager {
     createApiKeyGroup(provider) {
         const group = document.createElement('div');
         group.className = 'api-key-group';
+        
+        // Přidat security info pouze do první API key skupiny
+        const isFirstProvider = !document.querySelector('.security-info');
+        const securityInfo = isFirstProvider ? `
+            <div class="security-info">
+                <span class="security-text">
+                    🔒 Vaše klíče jsou šifrovány AES-256 a zůstávají pouze ve vašem zařízení. 
+                    <a href="#" class="security-link" onclick="if(window.settingsManager) window.settingsManager.showSecurityInfo(); return false;">Více informací</a>
+                </span>
+            </div>
+        ` : '';
+        
         group.innerHTML = `
+            ${securityInfo}
             <label>API Key</label>
             <div class="input-group">
                 <input type="password" id="${provider}-api-key" placeholder="${this.getApiKeyPlaceholder(provider)}" class="api-key-input">
@@ -701,6 +714,67 @@ class SettingsManager {
         }
     }
 
+    // Zobrazit informace o zabezpečení
+    showSecurityInfo() {
+        // Vytvořit modal
+        const modal = document.createElement('div');
+        modal.className = 'modal security-modal';
+        modal.innerHTML = `
+            <div class="modal-content security-modal-content">
+                <div class="modal-header">
+                    <h2>🔒 Zabezpečení vašich dat</h2>
+                    <button class="close-button" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="security-feature">
+                        <h3>✓ Lokální ukládání</h3>
+                        <p>Všechny API klíče jsou uloženy pouze ve vašem prohlížeči (localStorage). Nikdy nejsou odesílány na naše nebo jiné servery.</p>
+                    </div>
+                    
+                    <div class="security-feature">
+                        <h3>✓ Šifrování AES-256-GCM</h3>
+                        <p>Používáme vojenskou úroveň šifrování s unikátním klíčem pro každé zařízení. Vaše data jsou chráněna i v případě, že by někdo získal přístup k vašemu počítači.</p>
+                    </div>
+                    
+                    <div class="security-feature">
+                        <h3>✓ Přímá komunikace s AI</h3>
+                        <p>Vaše klíče jsou použity pouze pro přímé volání OpenAI, Anthropic nebo Google API. Komunikace probíhá přímo mezi vaším prohlížečem a AI službou.</p>
+                    </div>
+                    
+                    <div class="security-feature">
+                        <h3>✓ Export s dodatečnou ochranou</h3>
+                        <p>Při exportu konfigurace jsou klíče znovu zašifrovány vaším heslem pomocí PBKDF2 s 100,000 iteracemi. Export je tak bezpečný i pro sdílení nebo zálohu.</p>
+                    </div>
+                    
+                    <div class="security-feature">
+                        <h3>✓ Žádné analytiky</h3>
+                        <p>Nesbíráme žádná data o vašem používání aplikace. Žádné trackování, žádné cookies, žádná telemetrie. Vaše soukromí je naší prioritou.</p>
+                    </div>
+                    
+                    <div class="security-feature">
+                        <h3>ℹ️ Open Source</h3>
+                        <p>Celý kód aplikace je otevřený a můžete si ho prohlédnout. Transparentnost je základem důvěry.</p>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="save-button" onclick="this.closest('.modal').remove()">Rozumím</button>
+                </div>
+            </div>
+        `;
+        
+        // Přidat modal do body
+        document.body.appendChild(modal);
+        
+        // Zavřít při kliknutí mimo
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+    
     // Helper pro správu event listenerů
     addEventListener(element, event, handler) {
         if (!element) return;
