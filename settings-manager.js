@@ -1,5 +1,5 @@
 // Settings Manager - Správa nastavení aplikace
-// Verze: 2.0 - Opravená s konzistentním async/await a validacemi
+// Verze: 2.2 - S podporou všech providerů a individuálních Assistant ID
 
 class SettingsManager {
     constructor() {
@@ -248,17 +248,30 @@ class SettingsManager {
             const group = document.createElement('div');
             group.className = 'model-settings-group';
             
+            // Vytvořit unikátní storage key pro tento model
+            const modelIdKey = modelDef.id.toUpperCase().replace(/-/g, '_');
+            const storageKey = CONFIG.STORAGE.KEYS[`OPENAI_ASSISTANT_ID_${modelIdKey}`];
+            
+            // Pokud neexistuje specifický klíč, použít obecný
+            const finalStorageKey = storageKey || CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID;
+            
             // Použít unikátní ID s model ID
             const inputId = `${modelDef.id}-assistant-id`;
             
-            // Načíst uloženou hodnotu
-            const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID) || '';
+            // Načíst uloženou hodnotu pro tento konkrétní model
+            const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + finalStorageKey) || '';
             
             group.innerHTML = `
                 <h4>${modelDef.name} - Speciální nastavení</h4>
                 <div class="setting-item">
                     <label>OpenAI Assistant ID (pro Agent mode)</label>
-                    <input type="text" id="${inputId}" placeholder="asst_..." class="settings-input" value="${savedId}">
+                    <input type="text" 
+                           id="${inputId}" 
+                           data-model-id="${modelDef.id}"
+                           data-storage-key="${finalStorageKey}"
+                           placeholder="asst_..." 
+                           class="settings-input assistant-id-input" 
+                           value="${savedId}">
                     <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
                 </div>
             `;
@@ -372,7 +385,10 @@ class SettingsManager {
         const modelsByProvider = {
             openai: [],
             anthropic: [],
-            google: []
+            google: [],
+            perplexity: [],
+            together: [],
+            cohere: []
         };
         
         // Rozdělit viditelné modely podle providera
@@ -661,6 +677,18 @@ class SettingsManager {
                 // Google klíče začínají AIza
                 return apiKey.startsWith('AIza');
                 
+            case 'perplexity':
+                // Perplexity klíče začínají pplx-
+                return apiKey.startsWith('pplx-');
+                
+            case 'together':
+                // Together AI má dlouhé klíče
+                return apiKey.length >= 40;
+                
+            case 'cohere':
+                // Cohere klíče
+                return apiKey.length >= 30;
+                
             default:
                 // Pro neznámé providery akceptovat jakýkoliv klíč
                 return true;
@@ -669,25 +697,30 @@ class SettingsManager {
 
     // Uložit specifická nastavení modelů
     saveModelSpecificSettings() {
-        // OpenAI Assistant ID - hledat všechny možné assistant ID inputy
-        const assistantInputs = document.querySelectorAll('input[id$="-assistant-id"]');
+        // Najít všechny assistant ID inputy
+        const assistantInputs = document.querySelectorAll('.assistant-id-input');
         
-        if (assistantInputs.length > 0) {
-            // Vzít hodnotu z prvního nalezeného inputu (všechny by měly mít stejnou hodnotu)
-            const value = assistantInputs[0].value.trim();
+        assistantInputs.forEach(input => {
+            const modelId = input.getAttribute('data-model-id');
+            const storageKey = input.getAttribute('data-storage-key');
+            const value = input.value.trim();
             
-            if (value) {
-                localStorage.setItem(
-                    CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID,
-                    value
-                );
-            } else {
-                // Pokud je prázdný, odstranit z localStorage
-                localStorage.removeItem(
-                    CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID
-                );
+            if (storageKey) {
+                if (value) {
+                    localStorage.setItem(
+                        CONFIG.STORAGE.PREFIX + storageKey,
+                        value
+                    );
+                    console.log(`✅ Saved Assistant ID for ${modelId}: ${value}`);
+                } else {
+                    // Pokud je prázdný, odstranit z localStorage
+                    localStorage.removeItem(
+                        CONFIG.STORAGE.PREFIX + storageKey
+                    );
+                    console.log(`🗑️ Removed Assistant ID for ${modelId}`);
+                }
             }
-        }
+        });
     }
 
     // Test API klíče
@@ -701,7 +734,10 @@ class SettingsManager {
             const storageKey = {
                 'openai': CONFIG.STORAGE.KEYS.OPENAI_KEY,
                 'anthropic': CONFIG.STORAGE.KEYS.ANTHROPIC_KEY,
-                'google': CONFIG.STORAGE.KEYS.GOOGLE_KEY
+                'google': CONFIG.STORAGE.KEYS.GOOGLE_KEY,
+                'perplexity': CONFIG.STORAGE.KEYS.PERPLEXITY_KEY,
+                'together': CONFIG.STORAGE.KEYS.TOGETHER_KEY,
+                'cohere': CONFIG.STORAGE.KEYS.COHERE_KEY
             }[provider];
             
             apiKey = await window.security.loadSecure(storageKey);
@@ -744,9 +780,21 @@ class SettingsManager {
                     theme: localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.SELECTED_THEME),
                     selectedModel: localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.SELECTED_MODEL),
                     visibleModels: localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS),
-                    assistantId: localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID)
+                    // Exportovat všechny Assistant ID
+                    assistantIds: {}
                 }
             };
+
+            // Přidat všechny Assistant ID do exportu
+            const assistantIdKeys = Object.keys(CONFIG.STORAGE.KEYS)
+                .filter(key => key.startsWith('OPENAI_ASSISTANT_ID'));
+            
+            for (const key of assistantIdKeys) {
+                const value = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS[key]);
+                if (value) {
+                    config.settings.assistantIds[key] = value;
+                }
+            }
 
             // Zeptat se na heslo s informacemi o požadavcích
             const password = prompt(
@@ -846,12 +894,11 @@ class SettingsManager {
                 // Import nastavení
                 if (config.settings) {
                     Object.entries(config.settings).forEach(([key, value]) => {
-                        if (value !== null && value !== undefined) {
+                        if (value !== null && value !== undefined && key !== 'assistantIds') {
                             const storageKey = {
                                 'theme': CONFIG.STORAGE.KEYS.SELECTED_THEME,
                                 'selectedModel': CONFIG.STORAGE.KEYS.SELECTED_MODEL,
-                                'visibleModels': CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS,
-                                'assistantId': CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID
+                                'visibleModels': CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS
                             }[key];
                             
                             if (storageKey) {
@@ -859,6 +906,15 @@ class SettingsManager {
                             }
                         }
                     });
+                    
+                    // Import Assistant IDs
+                    if (config.settings.assistantIds) {
+                        Object.entries(config.settings.assistantIds).forEach(([key, value]) => {
+                            if (CONFIG.STORAGE.KEYS[key]) {
+                                localStorage.setItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS[key], value);
+                            }
+                        });
+                    }
                 }
 
                 // Aplikovat viditelnost modelů
@@ -1011,7 +1067,10 @@ class SettingsManager {
                 const apiKeys = [
                     CONFIG.STORAGE.KEYS.OPENAI_KEY,
                     CONFIG.STORAGE.KEYS.ANTHROPIC_KEY,
-                    CONFIG.STORAGE.KEYS.GOOGLE_KEY
+                    CONFIG.STORAGE.KEYS.GOOGLE_KEY,
+                    CONFIG.STORAGE.KEYS.PERPLEXITY_KEY,
+                    CONFIG.STORAGE.KEYS.TOGETHER_KEY,
+                    CONFIG.STORAGE.KEYS.COHERE_KEY
                 ];
                 
                 for (const key of apiKeys) {
@@ -1028,7 +1087,14 @@ class SettingsManager {
             if (clearSettings) {
                 localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.SELECTED_MODEL);
                 localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.USER_VISIBLE_MODELS);
-                localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID);
+                
+                // Vymazat všechny Assistant ID
+                const assistantIdKeys = Object.keys(CONFIG.STORAGE.KEYS)
+                    .filter(key => key.startsWith('OPENAI_ASSISTANT_ID'));
+                
+                for (const key of assistantIdKeys) {
+                    localStorage.removeItem(prefix + CONFIG.STORAGE.KEYS[key]);
+                }
             }
             
             // Vymazat téma a preference
@@ -1054,6 +1120,8 @@ class SettingsManager {
             this.showStatus('error', 'Chyba při mazání dat');
         }
     }
+    
+    // Zobrazit bezpečnostní informace
     showSecurityInfo() {
         // Vytvořit modal
         const modal = document.createElement('div');
@@ -1162,4 +1230,4 @@ class SettingsManager {
 // Vytvořit globální instanci
 window.settingsManager = new SettingsManager();
 
-console.log('⚙️ Settings Manager loaded (v2.0 - Fixed with password prompts)');
+console.log('⚙️ Settings Manager loaded (v2.2 - All providers + Individual Assistant IDs)');
