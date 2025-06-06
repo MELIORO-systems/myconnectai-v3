@@ -1,5 +1,6 @@
 // Security Manager - Vylepšená bezpečnost s Web Crypto API
 // Používá AES-GCM šifrování místo XOR
+// Verze: 2.0 - Opravená bez duplikací metod
 
 class SecurityManager {
     constructor() {
@@ -399,18 +400,10 @@ class SecurityManager {
         return keys;
     }
     
-    // Backward compatibility wrapper pro synchronní metody
-    // DEPRECATED - pouze pro přechodné období
-    loadSecure(key) {
-        console.warn('DEPRECATED: loadSecure() sync version is deprecated. Use async version instead.');
-        // Vrátit placeholder pro zpětnou kompatibilitu
-        return '';
-    }
-    
-    saveSecure(key, value) {
-        console.warn('DEPRECATED: saveSecure() sync version is deprecated. Use async version instead.');
-        // Uložit asynchronně v pozadí
-        this.saveSecure(key, value).catch(console.error);
+    // Helper metoda pro rychlou kontrolu existence klíče (bez dešifrování)
+    hasKey(key) {
+        const storageKey = CONFIG.STORAGE.PREFIX + key;
+        return localStorage.getItem(storageKey) !== null;
     }
 }
 
@@ -420,4 +413,4 @@ const security = new SecurityManager();
 // Export pro ostatní moduly
 window.security = security;
 
-console.log('🔐 Security Manager loaded');
+console.log('🔐 Security Manager loaded (v2.0 - Fixed)');
