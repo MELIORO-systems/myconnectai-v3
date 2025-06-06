@@ -1,5 +1,5 @@
 /* MyConnectAI v3 - Kompletní styly */
-/* Opravená verze s vylepšeními z melioro.online - všechna témata */
+/* Správná verze podle melioro.online */
 
 * {
     margin: 0;
@@ -9,183 +9,79 @@
 
 /* === COLOR SCHEMES === */
 :root {
-    /* Claude (Default) - teplejší béžové s výraznějšími kontrasty */
-    --primary-color: #E17B47;
-    --primary-hover: #D96A36;
-    --secondary-color: #8B7355;
-    --success-color: #52A373;
-    --warning-color: #E5A50A;
-    --error-color: #DC3545;
-    --background: #FBF9F4;
-    --surface: #F5F2ED;
-    --surface-hover: #EDE9E3;
-    --border: #E5E1DB;
-    --text-primary: #2C2416;
-    --text-secondary: #6B5D4F;
-    --text-muted: #A09383;
-    --shadow-sm: 0 2px 4px -1px rgb(45 42 38 / 0.06), 0 1px 2px -1px rgb(45 42 38 / 0.03);
-    --shadow: 0 4px 6px -1px rgb(45 42 38 / 0.1), 0 2px 4px -2px rgb(45 42 38 / 0.06);
-    --shadow-md: 0 10px 15px -3px rgb(45 42 38 / 0.1), 0 4px 6px -4px rgb(45 42 38 / 0.05);
-    --shadow-lg: 0 20px 25px -5px rgb(45 42 38 / 0.1), 0 8px 10px -6px rgb(45 42 38 / 0.04);
-    --shadow-xl: 0 25px 50px -12px rgb(45 42 38 / 0.15);
+    /* Claude (Default) */
+    --primary-color: #C96442;
+    --primary-hover: #B45309;
+    --secondary-color: #78716C;
+    --success-color: #16A34A;
+    --warning-color: #EAB308;
+    --error-color: #DC2626;
+    --background: #FAF9F5;
+    --surface: #F0EEE6;
+    --surface-hover: #E8E5DD;
+    --border: #E2DFD7;
+    --text-primary: #2D2A26;
+    --text-secondary: #6B6B6B;
+    --text-muted: #9CA3AF;
+    --shadow-sm: 0 1px 2px 0 rgb(45 42 38 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(45 42 38 / 0.1), 0 1px 2px -1px rgb(45 42 38 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(45 42 38 / 0.1), 0 4px 6px -4px rgb(45 42 38 / 0.1);
     --radius: 0.5rem;
     --radius-lg: 0.75rem;
 }
 
-/* Google theme - čistější s Material Design vlivem */
+/* Google theme */
 .theme-google {
     --primary-color: #1a73e8;
     --primary-hover: #1557b0;
-    --secondary-color: #5f6368;
-    --success-color: #137333;
-    --warning-color: #f29900;
-    --error-color: #d33b27;
-    --background: #ffffff;
-    --surface: #ffffff;
-    --surface-hover: #f8f9fa;
-    --border: #e8eaed;
+    --border: #dadce0;
     --text-primary: #202124;
     --text-secondary: #5f6368;
     --text-muted: #80868b;
-    --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
-    --shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
-    --shadow-md: 0 2px 6px 2px rgba(60,64,67,0.15), 0 1px 2px 0 rgba(60,64,67,0.3);
-    --shadow-lg: 0 4px 16px 2px rgba(60,64,67,0.15), 0 1px 3px 0 rgba(60,64,67,0.3);
-    --shadow-xl: 0 8px 24px 4px rgba(60,64,67,0.15);
+    --success-color: #137333;
+    --warning-color: #f29900;
+    --error-color: #d93025;
+    --background: #ffffff;
+    --surface: #f8f9fa;
+    --surface-hover: #f1f3f4;
 }
 
-/* Replit theme - tmavé s výraznější oranžovou */
+/* Replit theme */
 .theme-replit {
-    --primary-color: #F26207;
-    --primary-hover: #FF7A1F;
-    --secondary-color: #6BB6FF;
-    --success-color: #21C55E;
-    --warning-color: #F59E0B;
-    --error-color: #EF4444;
-    --background: #0D1117;
-    --surface: #161B22;
-    --surface-hover: #21262D;
-    --border: #30363D;
-    --text-primary: #F0F6FC;
-    --text-secondary: #8B949E;
-    --text-muted: #6E7681;
-    --shadow-sm: 0 2px 4px 0 rgba(0,0,0,0.5);
-    --shadow: 0 4px 8px 0 rgba(0,0,0,0.7), 0 2px 4px -2px rgba(0,0,0,0.7);
-    --shadow-md: 0 8px 16px 0 rgba(0,0,0,0.7), 0 4px 8px -4px rgba(0,0,0,0.7);
-    --shadow-lg: 0 16px 32px -5px rgba(0,0,0,0.8), 0 8px 16px -8px rgba(0,0,0,0.7);
-    --shadow-xl: 0 24px 48px -12px rgba(0,0,0,0.9);
+    --background: #0e1525;
+    --surface: #1c2333;
+    --surface-hover: #2d3748;
+    --border: #3a4553;
+    --text-primary: #f7fafc;
+    --text-secondary: #a0aec0;
+    --text-muted: #718096;
+    --primary-color: #f56565;
+    --primary-hover: #e53e3e;
+    --success-color: #48bb78;
+    --warning-color: #ed8936;
+    --error-color: #f56565;
 }
 
-/* Replit theme - speciální efekty */
-.theme-replit .primary-btn,
-.theme-replit .send-button,
-.theme-replit .save-button {
-    background: linear-gradient(135deg, #F26207 0%, #FF7A1F 100%);
-    box-shadow: 0 4px 20px rgba(242, 98, 7, 0.3);
-    transition: all 0.3s ease;
-}
-
-.theme-replit .primary-btn:hover,
-.theme-replit .send-button:hover,
-.theme-replit .save-button:hover {
-    background: linear-gradient(135deg, #FF7A1F 0%, #FF8F3D 100%);
-    box-shadow: 0 6px 30px rgba(242, 98, 7, 0.5);
-    transform: translateY(-2px);
-}
-
-/* Carrd theme - neonové futuristické s duhovými efekty */
+/* Carrd theme */
 .theme-carrd {
-    --primary-color: #00D9FF;
-    --primary-hover: #00B8E6;
-    --secondary-color: #FF0080;
-    --success-color: #00FF88;
-    --warning-color: #FFB800;
-    --error-color: #FF0040;
-    --background: #000000;
-    --surface: #0A0A0A;
-    --surface-hover: #141414;
-    --border: #1F1F1F;
-    --text-primary: #FFFFFF;
-    --text-secondary: #B3B3B3;
+    --primary-color: #00d9d9;
+    --primary-hover: #00ffff;
+    --secondary-color: #ff0080;
+    --success-color: #00d084;
+    --warning-color: #ffb900;
+    --error-color: #ff0080;
+    --background: #0d0f11;
+    --surface: #1a1d21;
+    --surface-hover: #242830;
+    --border: #2a2d35;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
     --text-muted: #666666;
-    --shadow-sm: 0 2px 8px rgba(0, 217, 255, 0.2);
-    --shadow: 0 4px 16px rgba(0, 217, 255, 0.3);
-    --shadow-md: 0 8px 24px rgba(0, 217, 255, 0.4);
-    --shadow-lg: 0 16px 48px rgba(0, 217, 255, 0.5);
-    --shadow-xl: 0 24px 64px rgba(0, 217, 255, 0.6);
+    --shadow-sm: 0 2px 8px rgba(0, 217, 217, 0.1);
+    --shadow: 0 4px 16px rgba(0, 217, 217, 0.2);
+    --shadow-lg: 0 8px 32px rgba(0, 217, 217, 0.3);
     --radius: 0.75rem;
     --radius-lg: 1rem;
-}
-
-/* Carrd theme - duhové tlačítko Odeslat */
-.theme-carrd .send-button {
-    background: linear-gradient(45deg, #FF0080, #FF8C00, #FFD700, #00FF00, #00CED1, #0080FF, #8A2BE2, #FF0080);
-    background-size: 300% 300%;
-    animation: rainbow-gradient 3s ease infinite;
-    box-shadow: 0 4px 30px rgba(0, 217, 255, 0.5);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-}
-
-.theme-carrd .send-button:hover:not(:disabled) {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 40px rgba(0, 217, 255, 0.7), 0 0 20px rgba(255, 0, 128, 0.5);
-    text-shadow: 0 0 20px rgba(255, 255, 255, 1);
-}
-
-@keyframes rainbow-gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Carrd theme - všechna ostatní tlačítka */
-.theme-carrd .primary-btn,
-.theme-carrd .save-button,
-.theme-carrd .action-button,
-.theme-carrd .action-btn {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
-    transition: all 0.3s ease;
-}
-
-.theme-carrd .primary-btn:hover,
-.theme-carrd .save-button:hover,
-.theme-carrd .action-button:hover,
-.theme-carrd .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(0, 217, 255, 0.6), 0 0 15px rgba(255, 0, 128, 0.3);
-}
-
-/* Carrd theme - input efekty */
-.theme-carrd input:focus,
-.theme-carrd textarea:focus,
-.theme-carrd select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
-}
-
-/* Carrd theme - zprávy */
-.theme-carrd .message {
-    transition: all 0.3s ease;
-}
-
-.theme-carrd .user-message {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, #CC0066 100%);
-    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.3);
-}
-
-.theme-carrd .assistant-message {
-    background: var(--surface);
-    border: 1px solid rgba(0, 217, 255, 0.3);
-    box-shadow: 0 4px 15px rgba(0, 217, 255, 0.2);
-}
-
-.theme-carrd .message:hover {
-    transform: translateX(5px);
-    box-shadow: 0 6px 25px rgba(0, 217, 255, 0.4);
 }
 
 body {
@@ -214,12 +110,6 @@ body {
     border: 1px solid var(--border);
 }
 
-/* Google theme - bez borderu pro čistší vzhled */
-.theme-google .chat-container {
-    border: none;
-    box-shadow: var(--shadow-xl);
-}
-
 /* === HEADER === */
 .chat-header {
     background: var(--surface);
@@ -230,7 +120,7 @@ body {
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
     min-height: 80px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .header-content {
@@ -250,19 +140,17 @@ body {
 .header-logo-link {
     color: var(--text-primary);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: color 0.2s ease;
 }
 
 .header-logo-link:hover {
     color: var(--primary-color);
-    transform: translateX(2px);
 }
 
 .header-subtitle {
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 400;
-    letter-spacing: 0.01em;
 }
 
 .header-buttons {
@@ -281,7 +169,7 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     position: relative;
     box-shadow: var(--shadow-sm);
 }
@@ -289,18 +177,8 @@ body {
 .action-button:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Google theme - Material Design tlačítka */
-.theme-google .action-button {
-    border: none;
+    transform: translateY(-1px);
     box-shadow: var(--shadow);
-}
-
-.theme-google .action-button:hover {
-    box-shadow: var(--shadow-md);
 }
 
 .action-button:active {
@@ -325,18 +203,6 @@ body {
     border: 1px solid var(--border);
     margin-top: 0.5rem;
     overflow: hidden;
-    animation: dropdownSlide 0.2s ease;
-}
-
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .dropdown-content.show {
@@ -348,7 +214,7 @@ body {
     padding: 0.875rem 1.25rem;
     text-decoration: none;
     display: block;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     border-bottom: 1px solid var(--border);
 }
 
@@ -358,7 +224,6 @@ body {
 
 .dropdown-content a:hover {
     background: var(--surface-hover);
-    padding-left: 1.5rem;
 }
 
 /* === MODAL === */
@@ -374,7 +239,6 @@ body {
     justify-content: center;
     align-items: center;
     animation: fadeIn 0.2s ease;
-    backdrop-filter: blur(4px);
 }
 
 .theme-replit .modal,
@@ -390,23 +254,23 @@ body {
 .modal-content {
     background: var(--background);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-lg);
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
     from {
-        transform: translateY(-20px) scale(0.95);
+        transform: translateY(-20px);
         opacity: 0;
     }
     to {
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
         opacity: 1;
     }
 }
@@ -424,7 +288,6 @@ body {
     margin: 0;
     font-size: 1.25rem;
     color: var(--text-primary);
-    letter-spacing: -0.02em;
 }
 
 .close-button {
@@ -441,7 +304,6 @@ body {
 .close-button:hover {
     background: var(--surface-hover);
     color: var(--text-primary);
-    transform: rotate(90deg);
 }
 
 .modal-body {
@@ -474,13 +336,12 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .cancel-button:hover {
     background: var(--surface-hover);
     border-color: var(--text-secondary);
-    transform: translateY(-1px);
 }
 
 /* === SETTINGS SECTIONS === */
@@ -490,11 +351,10 @@ body {
     border-radius: var(--radius);
     padding: 1.5rem;
     border: 1px solid var(--border);
-    transition: all 0.3s ease;
 }
 
-/* OPRAVA: Poslední settings-section bez dolní mezery */
-.modal-body .settings-section:last-child {
+/* OPRAVA: Odstranit spodní mezeru u poslední sekce */
+.settings-section:last-child {
     margin-bottom: 0;
 }
 
@@ -503,10 +363,9 @@ body {
     font-size: 1.1rem;
     color: var(--text-primary);
     font-weight: 600;
-    letter-spacing: -0.01em;
 }
 
-/* Provider sections */
+/* Provider sections - už mají vlastní styl, jen upravíme */
 .provider-section {
     background: var(--surface);
     border-radius: var(--radius);
@@ -515,8 +374,7 @@ body {
     border: 1px solid var(--border);
 }
 
-/* OPRAVA: Poslední provider-section bez dolní mezery */
-#providers-settings .provider-section:last-child {
+.provider-section:last-child {
     margin-bottom: 0;
 }
 
@@ -577,21 +435,16 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
 .settings-select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
-}
-
-.theme-google .settings-select:focus {
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
 }
 
 .theme-carrd .settings-select:focus {
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+    box-shadow: 0 0 0 2px rgba(0, 217, 217, 0.2);
 }
 
 .settings-select optgroup {
@@ -623,24 +476,22 @@ body {
     border-radius: 50%;
     border: 2px solid var(--border);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     position: relative;
 }
 
 .theme-btn:hover {
-    transform: scale(1.15);
+    transform: scale(1.1);
     border-color: var(--primary-color);
-    box-shadow: var(--shadow-md);
 }
 
 .theme-btn.active {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.2);
-    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.15);
 }
 
 .theme-claude {
-    background: linear-gradient(135deg, #FBF9F4 0%, #E17B47 100%);
+    background: linear-gradient(135deg, #FAF9F5 0%, #F0EEE6 100%);
 }
 
 .theme-google {
@@ -648,11 +499,11 @@ body {
 }
 
 .theme-replit {
-    background: linear-gradient(135deg, #0D1117 0%, #F26207 100%);
+    background: linear-gradient(135deg, #0e1525 0%, #f56565 100%);
 }
 
 .theme-carrd {
-    background: linear-gradient(135deg, #000000 0%, #00D9FF 50%, #FF0080 100%);
+    background: linear-gradient(135deg, #00d9d9 0%, #0d0f11 100%);
 }
 
 /* API Key Inputs */
@@ -685,24 +536,18 @@ body {
     background: var(--background);
     color: var(--text-primary);
     font-size: 0.875rem;
-    transition: all 0.3s ease;
 }
 
 .api-key-input:focus,
 .settings-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
-}
-
-.theme-google .api-key-input:focus,
-.theme-google .settings-input:focus {
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
 }
 
 .theme-carrd .api-key-input:focus,
 .theme-carrd .settings-input:focus {
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(0, 217, 217, 0.2);
 }
 
 .toggle-btn,
@@ -714,7 +559,7 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
@@ -722,8 +567,6 @@ body {
 .test-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
 }
 
 .api-key-group small {
@@ -756,15 +599,14 @@ body {
     color: var(--text-primary);
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .action-btn:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+    transform: translateY(-1px);
 }
 
 /* Save Button */
@@ -777,14 +619,13 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
 }
 
 .save-button:hover {
     background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
 }
 
 .save-button.has-changes {
@@ -792,9 +633,9 @@ body {
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(225, 123, 71, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(225, 123, 71, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(225, 123, 71, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(201, 100, 66, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(201, 100, 66, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(201, 100, 66, 0); }
 }
 
 /* Settings Status */
@@ -838,18 +679,17 @@ body {
     line-height: 1.6;
     font-size: 0.925rem;
     box-shadow: var(--shadow-sm);
-    animation: messageSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transition: all 0.3s ease;
+    animation: messageSlideIn 0.3s ease;
 }
 
 @keyframes messageSlideIn {
     from {
         opacity: 0;
-        transform: translateY(15px) scale(0.95);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
@@ -870,32 +710,22 @@ body {
     border: 1px solid var(--border);
 }
 
-/* Google theme - čistější zprávy */
-.theme-google .assistant-message {
-    border: none;
-    box-shadow: var(--shadow);
-}
-
-/* Hover efekty pro světlá témata */
-.message:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
 .system-message {
-    background: rgba(225, 123, 71, 0.1);
+    background: rgba(201, 100, 66, 0.1);
     color: var(--primary-color);
     margin: 1rem auto;
     text-align: center;
     width: fit-content;
     max-width: 95%;
     font-style: italic;
-    border: 1px solid rgba(225, 123, 71, 0.2);
+    border: 1px solid rgba(201, 100, 66, 0.2);
 }
 
 .theme-carrd .system-message {
-    background: rgba(0, 217, 255, 0.1);
-    border-color: rgba(0, 217, 255, 0.3);
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    font-style: normal;
 }
 
 .error-message {
@@ -919,7 +749,6 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 400px;
-    animation: fadeIn 0.5s ease;
 }
 
 .welcome-content {
@@ -931,7 +760,6 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
 }
 
 .welcome-subtitle {
@@ -955,7 +783,7 @@ body {
     border-radius: var(--radius);
     padding: 1rem 1.25rem;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     text-align: left;
     font-size: 0.875rem;
     color: var(--text-primary);
@@ -972,7 +800,7 @@ body {
     height: 2px;
     background: var(--primary-color);
     transform: scaleX(0);
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
 }
 
 .example-query:hover::before {
@@ -982,8 +810,8 @@ body {
 .example-query:hover {
     background: var(--surface-hover);
     border-color: var(--primary-color);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 /* === CHAT INPUT === */
@@ -1005,7 +833,7 @@ body {
     resize: none;
     outline: none;
     background: var(--background);
-    transition: all 0.3s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, height 0.1s ease;
     font-family: inherit;
     line-height: 1.6;
     min-height: 2.75rem;
@@ -1017,16 +845,11 @@ body {
 
 .chat-input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(225, 123, 71, 0.15);
-    transform: translateY(-1px);
-}
-
-.theme-google .chat-input:focus {
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.1);
 }
 
 .theme-carrd .chat-input:focus {
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(0, 217, 217, 0.2);
 }
 
 .chat-input::placeholder {
@@ -1042,15 +865,14 @@ body {
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     white-space: nowrap;
-    box-shadow: var(--shadow);
 }
 
 .send-button:hover:not(:disabled) {
     background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
 }
 
 .send-button:disabled {
@@ -1088,29 +910,16 @@ body {
 }
 
 .footer-link {
-    color: var(--primary-color);
+    color: inherit;
     text-decoration: none;
-    transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-    color: var(--primary-hover);
     text-decoration: underline;
 }
 
 .footer-link strong {
-    font-weight: 600;
-}
-
-/* Theme-specific footer link colors */
-.theme-carrd .footer-link {
     color: var(--primary-color);
-    text-shadow: 0 0 10px var(--primary-color);
-}
-
-.theme-carrd .footer-link:hover {
-    color: var(--primary-hover);
-    text-shadow: 0 0 20px var(--primary-color);
 }
 
 /* === ABOUT SECTION === */
@@ -1179,6 +988,134 @@ body {
 
 .status-dot.error {
     background: var(--error-color);
+}
+
+/* === CARRD THEME SPECIAL STYLES === */
+.theme-carrd body {
+    background: #000000;
+}
+
+.theme-carrd .chat-container {
+    box-shadow: 0 0 40px rgba(0, 217, 217, 0.1);
+}
+
+.theme-carrd .chat-header h1 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.theme-carrd .action-button {
+    border: 1px solid var(--primary-color);
+    background: transparent;
+    color: var(--primary-color);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 2rem;
+}
+
+.theme-carrd .action-button:hover {
+    background: var(--primary-color);
+    color: var(--background);
+    box-shadow: 0 0 20px rgba(0, 217, 217, 0.5);
+    transform: translateY(-2px);
+}
+
+.theme-carrd .theme-btn {
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.theme-carrd .theme-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+    opacity: 1;
+}
+
+.theme-carrd .theme-btn.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 217, 217, 0.5);
+    opacity: 1;
+}
+
+.theme-carrd .welcome-title {
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.theme-carrd .example-query {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: all 0.3s ease;
+}
+
+.theme-carrd .example-query::before {
+    display: none;
+}
+
+.theme-carrd .example-query:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 217, 217, 0.2);
+}
+
+.theme-carrd .user-message {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--background);
+    border: none;
+}
+
+.theme-carrd .chat-input-area {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+.theme-carrd .chat-input {
+    border: 1px solid var(--border);
+    background: var(--background);
+}
+
+.theme-carrd .chat-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 217, 217, 0.2);
+    background: var(--surface);
+}
+
+.theme-carrd .send-button {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--background);
+    border: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 217, 217, 0.3);
+}
+
+.theme-carrd .send-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 217, 217, 0.5);
+}
+
+.theme-carrd .send-button:disabled {
+    background: var(--border);
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+.theme-carrd .footer-link strong {
+    color: var(--primary-color);
+}
+
+.theme-carrd .footer-link:hover strong {
+    color: var(--primary-hover);
+    text-shadow: 0 0 10px rgba(0, 217, 217, 0.5);
 }
 
 /* === RESPONSIVE === */
@@ -1295,13 +1232,13 @@ body {
 }
 
 .theme-replit .security-info {
-    background: rgba(242, 98, 7, 0.1);
-    border-color: rgba(242, 98, 7, 0.3);
+    background: rgba(245, 101, 101, 0.1);
+    border-color: rgba(245, 101, 101, 0.3);
 }
 
 .theme-carrd .security-info {
-    background: rgba(0, 217, 255, 0.1);
-    border-color: rgba(0, 217, 255, 0.3);
+    background: rgba(0, 217, 217, 0.1);
+    border-color: rgba(0, 217, 217, 0.3);
 }
 
 .security-text {
@@ -1390,18 +1327,6 @@ body {
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--border) var(--background);
-}
-
-/* === SPECIAL EFFECTS FOR CARRD THEME === */
-.theme-carrd .chat-header,
-.theme-carrd .modal-header,
-.theme-carrd .app-footer {
-    background: linear-gradient(135deg, var(--surface) 0%, rgba(0, 217, 255, 0.05) 100%);
-}
-
-.theme-carrd .action-button:active,
-.theme-carrd .send-button:active:not(:disabled) {
-    transform: scale(0.98);
 }
 
 /* === LOADING ANIMATION === */
