@@ -1,5 +1,5 @@
 // Model Manager - Centrální správa AI modelů
-// Verze: 3.0 - Opravená verze bez duplikací, plně async
+// Verze: 3.1 - S podporou všech providerů
 
 // Custom error classes
 class ModelError extends Error {
@@ -563,4 +563,4 @@ window.ModelError = ModelError;
 window.APIError = APIError;
 window.ConfigurationError = ConfigurationError;
 
-console.log('📦 Model Manager loaded (v3.0 - Fixed)');
+console.log('📦 Model Manager loaded (v3.1 - All providers)');
