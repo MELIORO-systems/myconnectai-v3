@@ -104,10 +104,13 @@
                     <h3>Záloha konfigurace</h3>
                     <div class="export-import-buttons">
                         <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.exportConfig(); else console.error('Settings Manager not ready');">
-                            📤 Export nastavení
+                            Export nastavení
                         </button>
                         <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.importConfig(); else console.error('Settings Manager not ready');">
-                            📥 Import nastavení
+                            Import nastavení
+                        </button>
+                        <button class="action-btn" onclick="if(window.settingsManager) window.settingsManager.clearData(); else console.error('Settings Manager not ready');">
+                            Vymazat data
                         </button>
                     </div>
                 </div>
