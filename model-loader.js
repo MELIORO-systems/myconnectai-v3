@@ -123,7 +123,31 @@ class ModelLoader {
                         console.warn('Google model implementation not found - skipping');
                         return null;
                     }
-                    
+
+                case 'perplexity':
+                    if (window.PerplexityModel) {
+                        return new PerplexityModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Perplexity model implementation not found - skipping');
+                        return null;
+                    }
+    
+                case 'together':
+                    if (window.TogetherModel) {
+                        return new TogetherModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Together model implementation not found - skipping');
+                        return null;
+                    }
+    
+                case 'cohere':
+                    if (window.CohereModel) {
+                        return new CohereModel(modelDef.id, modelDef);
+                    } else {
+                        console.warn('Cohere model implementation not found - skipping');
+                        return null;
+                    }
+      
                 default:
                     console.warn(`Unknown provider: ${modelDef.provider}`);
                     return null;
