@@ -200,14 +200,27 @@ class SettingsManager {
         if (modelDef.provider === 'openai' && modelDef.config?.capabilities?.includes('assistant')) {
             const group = document.createElement('div');
             group.className = 'model-settings-group';
+            
+            // Načíst uloženou hodnotu
+            const savedId = localStorage.getItem(CONFIG.STORAGE.PREFIX + CONFIG.STORAGE.KEYS.OPENAI_ASSISTANT_ID) || '';
+            
             group.innerHTML = `
                 <h4>${modelDef.name} - Speciální nastavení</h4>
                 <div class="setting-item">
                     <label>OpenAI Assistant ID (pro Agent mode)</label>
-                    <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input">
+                    <input type="text" id="openai-assistant-id" placeholder="asst_..." class="settings-input" value="${savedId}">
                     <small>Volitelné - pouze pokud používáte OpenAI Assistants API</small>
                 </div>
             `;
+            
+            // Přidat event listener pro změny
+            setTimeout(() => {
+                const input = document.getElementById('openai-assistant-id');
+                if (input) {
+                    this.addEventListener(input, 'change', () => this.markAsChanged());
+                }
+            }, 100);
+            
             return group;
         }
         
@@ -388,6 +401,7 @@ class SettingsManager {
     loadModelSpecificSettings() {
         // Vše je nyní řešeno v loadHierarchicalSettings
         // Tato funkce zůstává pro zpětnou kompatibilitu
+        // Už nevoláme updateModelSpecificSettings protože element neexistuje
     }
 
     // Označit jako změněno
