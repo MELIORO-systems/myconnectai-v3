@@ -143,7 +143,7 @@ class SettingsManager {
         const names = {
             'openai': 'OpenAI',
             'anthropic': 'Anthropic (Claude)',
-            'google': 'Google (Gemini)'
+            'google': 'Google (Gemini)',
             'perplexity': 'Perplexity AI',
             'together': 'Together AI',
             'cohere': 'Cohere'
@@ -214,7 +214,7 @@ class SettingsManager {
         const urls = {
             'openai': 'https://platform.openai.com/api-keys',
             'anthropic': 'https://console.anthropic.com/',
-            'google': 'https://aistudio.google.com/app/apikey'
+            'google': 'https://aistudio.google.com/app/apikey',
             'perplexity': 'https://www.perplexity.ai/settings/api',
             'together': 'https://api.together.xyz/settings/api-keys',
             'cohere': 'https://dashboard.cohere.com/api-keys'
@@ -227,7 +227,7 @@ class SettingsManager {
         const domains = {
             'openai': 'platform.openai.com',
             'anthropic': 'console.anthropic.com',
-            'google': 'aistudio.google.com'
+            'google': 'aistudio.google.com',
             'perplexity': 'perplexity.ai',
             'together': 'together.xyz',
             'cohere': 'dashboard.cohere.com'
@@ -472,7 +472,7 @@ class SettingsManager {
         const placeholders = {
             'openai': 'sk-...',
             'anthropic': 'sk-ant-...',
-            'google': 'AIza...'
+            'google': 'AIza...',
             'perplexity': 'pplx-...',
             'together': 'Váš Together AI klíč',
             'cohere': 'Váš Cohere API klíč'
