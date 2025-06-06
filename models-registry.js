@@ -27,8 +27,8 @@ const MODELS_REGISTRY = [
         id: "gpt-4",
         provider: "openai",
         name: "GPT-4",
-        enabled: false,
-        visible: false,
+        enabled: true,
+        visible: true,
         config: {
             model: "gpt-4",
             contextWindow: 8192,
@@ -44,8 +44,8 @@ const MODELS_REGISTRY = [
         id: "gpt-4-turbo-preview",
         provider: "openai",
         name: "GPT-4 Turbo",
-        enabled: false,
-        visible: false,
+        enabled: true,
+        visible: true,
         config: {
             model: "gpt-4-turbo-preview",
             contextWindow: 128000,
