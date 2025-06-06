@@ -1,5 +1,5 @@
 // UI Manager - Správa uživatelského rozhraní
-// Verze: 2.0 - Pro MyConnectAI v3
+// Verze: 3.0 - Opravená s validacemi a lepším error handling
 
 class UIManager {
     constructor() {
@@ -7,6 +7,8 @@ class UIManager {
         this.isWelcomeScreenVisible = true;
         this.lastSystemMessageElement = null;
         this.menuOpen = false;
+        this.aboutModal = null;
+        this.securityModal = null;
     }
 
     // Inicializace UI
@@ -18,7 +20,7 @@ class UIManager {
         if (savedTheme && this.isValidTheme(savedTheme)) {
             this.currentTheme = savedTheme;
         } else {
-            this.currentTheme = CONFIG.UI.DEFAULT_THEME || 'claude';
+            this.currentTheme = CONFIG.UI?.DEFAULT_THEME || 'claude';
         }
         
         // Aplikovat téma
@@ -38,13 +40,16 @@ class UIManager {
     // Toggle hlavní menu
     toggleMenu() {
         const dropdown = document.getElementById('mainMenu');
-        if (dropdown) {
-            this.menuOpen = !this.menuOpen;
-            if (this.menuOpen) {
-                dropdown.classList.add('show');
-            } else {
-                dropdown.classList.remove('show');
-            }
+        if (!dropdown) {
+            console.error('Main menu dropdown not found');
+            return;
+        }
+        
+        this.menuOpen = !this.menuOpen;
+        if (this.menuOpen) {
+            dropdown.classList.add('show');
+        } else {
+            dropdown.classList.remove('show');
         }
     }
 
@@ -68,12 +73,22 @@ class UIManager {
         this.updateAboutInfo();
         
         // Zobrazit modal
-        document.getElementById('about-modal').style.display = 'flex';
+        const aboutModal = document.getElementById('about-modal');
+        if (aboutModal) {
+            aboutModal.style.display = 'flex';
+            this.aboutModal = aboutModal;
+        }
+        
         this.closeMenu();
     }
 
     // Vytvořit About modal
     createAboutModal() {
+        // Zkontrolovat, zda modal již neexistuje
+        if (document.getElementById('about-modal')) {
+            return;
+        }
+        
         const modal = document.createElement('div');
         modal.id = 'about-modal';
         modal.className = 'modal';
@@ -86,8 +101,8 @@ class UIManager {
                 
                 <div class="modal-body">
                     <div class="about-content">
-                        <h2>${CONFIG.SYSTEM.NAME}</h2>
-                        <p>${CONFIG.SYSTEM.DESCRIPTION}</p>
+                        <h2>${CONFIG.SYSTEM?.NAME || 'MyConnectAI'}</h2>
+                        <p>${CONFIG.SYSTEM?.DESCRIPTION || 'Multi-Model AI Chat aplikace'}</p>
                         
                         <div class="status-indicator">
                             <span class="status-dot" id="system-status-dot"></span>
@@ -101,9 +116,9 @@ class UIManager {
                         
                         <h3>Systémové informace</h3>
                         <ul>
-                            <li>Verze: ${CONFIG.VERSION}</li>
-                            <li>Build: ${CONFIG.SYSTEM.BUILD_DATE}</li>
-                            <li>Vývojář: ${CONFIG.SYSTEM.AUTHOR}</li>
+                            <li>Verze: ${CONFIG.VERSION || 'N/A'}</li>
+                            <li>Build: ${CONFIG.SYSTEM?.BUILD_DATE || 'N/A'}</li>
+                            <li>Vývojář: ${CONFIG.SYSTEM?.AUTHOR || 'N/A'}</li>
                         </ul>
                         
                         <h3>Klávesové zkratky</h3>
@@ -114,22 +129,33 @@ class UIManager {
                         </ul>
                         
                         <h3>Podpora</h3>
-                        <p>Email: <a href="mailto:${CONFIG.SYSTEM.SUPPORT_EMAIL}">${CONFIG.SYSTEM.SUPPORT_EMAIL}</a></p>
-                        <p>Dokumentace: <a href="${CONFIG.SYSTEM.DOCUMENTATION}" target="_blank">Online dokumentace</a></p>
+                        <p>Email: <a href="mailto:${CONFIG.SYSTEM?.SUPPORT_EMAIL || ''}">${CONFIG.SYSTEM?.SUPPORT_EMAIL || 'N/A'}</a></p>
+                        <p>Dokumentace: <a href="${CONFIG.SYSTEM?.DOCUMENTATION || '#'}" target="_blank">Online dokumentace</a></p>
                     </div>
                 </div>
             </div>
         `;
         
         document.body.appendChild(modal);
+        
+        // Přidat event listener pro zavření při kliknutí mimo
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeAbout();
+            }
+        });
     }
 
     // Aktualizovat informace v About
-    updateAboutInfo() {
+    async updateAboutInfo() {
         // Status systému
         const statusDot = document.getElementById('system-status-dot');
         const statusText = document.getElementById('system-status-text');
         const modelsList = document.getElementById('available-models-list');
+        
+        if (!statusDot || !statusText || !modelsList) {
+            return;
+        }
         
         if (!window.modelManager) {
             statusDot.className = 'status-dot error';
@@ -137,27 +163,33 @@ class UIManager {
             return;
         }
         
-        // Získat info o modelech
-        const availableModels = window.modelManager.getAvailableModels();
-        const configuredModels = availableModels.filter(m => m.hasApiKey);
-        
-        // Status
-        if (configuredModels.length === 0) {
+        try {
+            // Získat info o modelech - použít sync verzi pro rychlost
+            const availableModels = window.modelManager.getAvailableModelsSync();
+            const configuredModels = availableModels.filter(m => m.hasApiKey);
+            
+            // Status
+            if (configuredModels.length === 0) {
+                statusDot.className = 'status-dot error';
+                statusText.textContent = 'Žádný model není nakonfigurován';
+            } else {
+                statusDot.className = 'status-dot';
+                statusText.textContent = `${configuredModels.length} z ${availableModels.length} modelů nakonfigurováno`;
+            }
+            
+            // Seznam modelů
+            modelsList.innerHTML = availableModels.map(model => `
+                <li>
+                    ${model.name} 
+                    ${model.hasApiKey ? '✅' : '❌'} 
+                    ${model.isActive ? '(aktivní)' : ''}
+                </li>
+            `).join('');
+        } catch (error) {
+            console.error('Error updating about info:', error);
             statusDot.className = 'status-dot error';
-            statusText.textContent = 'Žádný model není nakonfigurován';
-        } else {
-            statusDot.className = 'status-dot';
-            statusText.textContent = `${configuredModels.length} z ${availableModels.length} modelů nakonfigurováno`;
+            statusText.textContent = 'Chyba při načítání informací';
         }
-        
-        // Seznam modelů
-        modelsList.innerHTML = availableModels.map(model => `
-            <li>
-                ${model.name} 
-                ${model.hasApiKey ? '✅' : '❌'} 
-                ${model.isActive ? '(aktivní)' : ''}
-            </li>
-        `).join('');
     }
 
     // Zavřít About modal
@@ -166,6 +198,7 @@ class UIManager {
         if (modal) {
             modal.style.display = 'none';
         }
+        this.aboutModal = null;
     }
 
     // === THEME FUNKCE ===
@@ -207,13 +240,19 @@ class UIManager {
     // Zobrazit welcome screen
     showWelcomeScreen() {
         const chatMessages = document.getElementById('chat-messages');
-        if (!chatMessages) return;
+        if (!chatMessages) {
+            console.error('Chat messages container not found');
+            return;
+        }
+        
+        const welcomeTitle = CONFIG.MESSAGES?.WELCOME || 'Vítejte v MyConnectAI';
+        const welcomeSubtitle = CONFIG.UI?.APP_SUBTITLE || 'Multi-Model AI Assistant';
         
         chatMessages.innerHTML = `
             <div class="welcome-container">
                 <div class="welcome-content">
-                    <h2 class="welcome-title">${CONFIG.MESSAGES.WELCOME}</h2>
-                    <p class="welcome-subtitle">${CONFIG.UI.APP_SUBTITLE}</p>
+                    <h2 class="welcome-title">${this.escapeHtml(welcomeTitle)}</h2>
+                    <p class="welcome-subtitle">${this.escapeHtml(welcomeSubtitle)}</p>
                 </div>
                 <div class="example-queries" id="example-queries">
                     <!-- Příklady budou načteny dynamicky -->
@@ -228,6 +267,7 @@ class UIManager {
         const chatInput = document.getElementById('chat-input');
         if (chatInput) {
             chatInput.value = '';
+            chatInput.style.height = 'auto';
         }
     }
 
@@ -245,11 +285,16 @@ class UIManager {
         const container = document.getElementById('example-queries');
         if (!container) return;
         
-        const queries = CONFIG.UI.EXAMPLE_QUERIES || [];
+        const queries = CONFIG.UI?.EXAMPLE_QUERIES || [];
+        
+        if (!Array.isArray(queries) || queries.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-muted);">Žádné příklady nejsou k dispozici</p>';
+            return;
+        }
         
         container.innerHTML = queries.map(query => `
-            <div class="example-query" onclick="window.uiManager.useExampleQuery('${query.replace(/'/g, "\\'")}')">
-                ${query}
+            <div class="example-query" onclick="window.uiManager.useExampleQuery('${this.escapeForAttribute(query)}')">
+                ${this.escapeHtml(query)}
             </div>
         `).join('');
     }
@@ -262,7 +307,7 @@ class UIManager {
             chatInput.focus();
             
             // Automaticky odeslat
-            if (window.sendMessage) {
+            if (window.sendMessage && typeof window.sendMessage === 'function') {
                 window.sendMessage();
             }
         }
@@ -273,7 +318,23 @@ class UIManager {
     // Přidat zprávu do chatu
     addMessage(type, content) {
         const chatMessages = document.getElementById('chat-messages');
-        if (!chatMessages) return;
+        if (!chatMessages) {
+            console.error('Chat messages container not found');
+            return;
+        }
+        
+        // Validace typu zprávy
+        const validTypes = ['user', 'assistant', 'system', 'error'];
+        if (!validTypes.includes(type)) {
+            console.error(`Invalid message type: ${type}`);
+            type = 'system';
+        }
+        
+        // Validace obsahu
+        if (!content || typeof content !== 'string') {
+            console.error('Invalid message content');
+            return;
+        }
         
         // Skrýt welcome screen při první zprávě
         if (this.isWelcomeScreenVisible) {
@@ -292,7 +353,7 @@ class UIManager {
         messageDiv.textContent = content;
         
         // Uložit referenci na system zprávy (loading)
-        if (type === 'system' && content.includes(CONFIG.MESSAGES.LOADING)) {
+        if (type === 'system' && content.includes(CONFIG.MESSAGES?.LOADING || 'Přemýšlím')) {
             this.lastSystemMessageElement = messageDiv;
         }
         
@@ -328,7 +389,10 @@ class UIManager {
     // Toggle viditelnost inputu (pro API klíče)
     toggleVisibility(inputId) {
         const input = document.getElementById(inputId);
-        if (!input) return;
+        if (!input) {
+            console.error(`Input not found: ${inputId}`);
+            return;
+        }
         
         const button = input.parentNode.querySelector('.toggle-btn');
         if (input.type === 'password') {
@@ -344,6 +408,18 @@ class UIManager {
     updateModelIndicator(modelId) {
         // Tato funkce již není potřeba, protože model selector je v nastavení
         console.log(`Model changed to: ${modelId}`);
+    }
+
+    // Escape HTML pro bezpečnost
+    escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // Escape pro atributy
+    escapeForAttribute(str) {
+        return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
     // === EVENT LISTENERS ===
@@ -374,6 +450,16 @@ class UIManager {
                     window.settingsManager.open();
                 }
             }
+            
+            // Escape pro zavření modalů
+            if (e.key === 'Escape') {
+                if (this.aboutModal) {
+                    this.closeAbout();
+                }
+                if (this.menuOpen) {
+                    this.closeMenu();
+                }
+            }
         });
         
         // Auto-resize pro textarea
@@ -398,12 +484,37 @@ class UIManager {
             chatInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
-                    if (window.sendMessage) {
+                    if (window.sendMessage && typeof window.sendMessage === 'function') {
                         window.sendMessage();
                     }
                 }
             });
         }
+        
+        // Responsivní menu - zavřít při resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (this.menuOpen && window.innerWidth > 768) {
+                    this.closeMenu();
+                }
+            }, 250);
+        });
+    }
+    
+    // Cleanup metoda
+    destroy() {
+        // Zavřít všechny otevřené modaly
+        this.closeAbout();
+        this.closeMenu();
+        
+        // Vyčistit reference
+        this.lastSystemMessageElement = null;
+        this.aboutModal = null;
+        this.securityModal = null;
+        
+        console.log('🧹 UI Manager destroyed');
     }
 }
 
@@ -415,4 +526,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.uiManager.init();
 });
 
-console.log('📦 UI Manager loaded');
+console.log('📦 UI Manager loaded (v3.0 - Fixed)');
