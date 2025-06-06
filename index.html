@@ -62,6 +62,8 @@
         <div class="app-footer">
             <div class="footer-content">
                 <span class="footer-text">Powered by <a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link"><strong>MELIORO Systems</strong></a></span>
+                <span class="footer-separator">•</span>
+                <span class="footer-text"><a href="http://melioro.cz" target="_blank" rel="noopener noreferrer" class="footer-link">Návrat na stránky MELIORO</a></span>
             </div>
         </div>
     </div>
@@ -156,9 +158,14 @@
             
             <div class="modal-footer">
                 <div class="settings-status" id="settings-status"></div>
-                <button class="save-button" onclick="if(window.settingsManager) window.settingsManager.save()">
-                    Uložit nastavení
-                </button>
+                <div class="modal-footer-buttons">
+                    <button class="cancel-button" onclick="if(window.settingsManager) window.settingsManager.close()">
+                        Storno
+                    </button>
+                    <button class="save-button" onclick="if(window.settingsManager) window.settingsManager.save()">
+                        Uložit nastavení
+                    </button>
+                </div>
             </div>
         </div>
     </div>
