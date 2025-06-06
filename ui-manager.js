@@ -292,11 +292,21 @@ class UIManager {
             return;
         }
         
-        container.innerHTML = queries.map(query => `
-            <div class="example-query" onclick="window.uiManager.useExampleQuery('${this.escapeForAttribute(query)}')">
+        container.innerHTML = queries.map((query, index) => `
+            <div class="example-query" data-query="${this.escapeForAttribute(query)}">
                 ${this.escapeHtml(query)}
             </div>
         `).join('');
+        
+        // Přidat event listenery
+        container.querySelectorAll('.example-query').forEach((element) => {
+            element.addEventListener('click', () => {
+                const query = element.getAttribute('data-query');
+                if (query) {
+                    this.useExampleQuery(query);
+                }
+            });
+        });
     }
 
     // Použít příklad dotazu
