@@ -736,8 +736,20 @@ class SettingsManager {
                 }
             };
 
-            // Zeptat se na heslo
-            const password = prompt('Zadejte heslo pro zabezpečení exportu:');
+            // Zeptat se na heslo s informacemi o požadavcích
+            const password = prompt(
+                'Zadejte heslo pro zabezpečení exportu:\n\n' +
+                '📋 Požadavky na heslo:\n' +
+                '• Minimálně 8 znaků\n' +
+                '• Alespoň 3 z následujících typů znaků:\n' +
+                '  - malá písmena (a-z)\n' +
+                '  - velká písmena (A-Z)\n' +
+                '  - čísla (0-9)\n' +
+                '  - speciální znaky (!@#$%^&*)\n\n' +
+                '⚠️ Toto heslo si zapamatujte!\n' +
+                'Bude potřeba pro pozdější import.'
+            );
+            
             if (!password) return;
 
             // Validace hesla
@@ -798,13 +810,24 @@ class SettingsManager {
 
                 // Zeptat se na heslo pokud obsahuje API klíče
                 if (config.apiKeys) {
-                    const password = prompt('Zadejte heslo pro import:');
+                    const password = prompt(
+                        'Zadejte heslo pro import:\n\n' +
+                        'Použijte stejné heslo, které jste zadali při exportu.\n\n' +
+                        'Pokud heslo neznáte, import nebude možný.'
+                    );
+                    
                     if (!password) return;
 
                     // Import API klíčů
                     const imported = await window.security.importSecureData(config.apiKeys, password);
                     if (!imported) {
-                        throw new Error('Nesprávné heslo');
+                        throw new Error(
+                            'Import selhal!\n\n' +
+                            'Možné důvody:\n' +
+                            '• Nesprávné heslo\n' +
+                            '• Poškozený soubor\n' +
+                            '• Soubor byl vytvořen na jiném zařízení s jiným šifrovacím klíčem'
+                        );
                     }
                 }
 
@@ -845,7 +868,13 @@ class SettingsManager {
 
             } catch (error) {
                 console.error('Import error:', error);
-                this.showStatus('error', CONFIG.MESSAGES.IMPORT_ERROR);
+                
+                // Zobrazit specifickou chybovou zprávu
+                if (error.message.includes('Nesprávné heslo') || error.message.includes('Import selhal!')) {
+                    this.showStatus('error', error.message);
+                } else {
+                    this.showStatus('error', CONFIG.MESSAGES.IMPORT_ERROR + '\n\n' + error.message);
+                }
             }
         };
 
@@ -1020,13 +1049,13 @@ class SettingsManager {
         modal.innerHTML = `
             <div class="modal-content security-modal-content">
                 <div class="modal-header">
-                    <h2>🔒 Zabezpečení vašich dat</h2>
+                    <h2>Zabezpečení vašich dat</h2>
                     <button class="close-button" onclick="this.closest('.modal').remove()">&times;</button>
                 </div>
                 
                 <div class="modal-body">
                     <div class="security-feature">
-                        <h3>✓ Lokální ukládání</h3>
+                        <h3>Lokální ukládání</h3>
                         <p>Všechny API klíče jsou uloženy pouze ve vašem prohlížeči (localStorage). Nikdy nejsou odesílány na naše nebo jiné servery.</p>
                     </div>
                     
@@ -1121,4 +1150,4 @@ class SettingsManager {
 // Vytvořit globální instanci
 window.settingsManager = new SettingsManager();
 
-console.log('⚙️ Settings Manager loaded (v2.0 - Fixed)');
+console.log('⚙️ Settings Manager loaded (v2.0 - Fixed with password prompts)');
