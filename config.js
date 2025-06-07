@@ -107,7 +107,7 @@ const CONFIG = {
     // === SYSTEM INFO ===
     SYSTEM: {
         NAME: "MyConnectAI v3",
-        DESCRIPTION: "MyConnectAI je pokročilá webová aplikace, která sjednocuje přístup k nejmodernějším AI modelům v jediném intuitivním a jednoduchém rozhraní. Vaše API klíče jsou bezpečně šifrovány přímo ve vašem prohlížeči - žádná data neopouštějí vaše zařízení.",
+        DESCRIPTION: "MyConnectAI je pokročilá webová aplikace, která sjednocuje přístup k AI modelům v jediném intuitivním a jednoduchém rozhraní. Vaše API klíče jsou bezpečně šifrovány přímo ve vašem prohlížeči - žádná data neopouštějí vaše zařízení.",
         VERSION: "3.2.0",
         BUILD_DATE: "2025-06-05",
         AUTHOR: "MELIORO Systems",
