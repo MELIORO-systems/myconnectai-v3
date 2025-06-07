@@ -113,8 +113,8 @@ const CONFIG = {
         AUTHOR: "MELIORO Systems",
         LICENSE: "Proprietary",
         REPOSITORY: "https://github.com/melioro-systems/myconnectai-v3",
-        DOCUMENTATION: "https://docs.melioro.cz/myconnectai",
-        SUPPORT_EMAIL: "support@melioro.cz"
+        DOCUMENTATION: "https:myconnectai.cz",
+        SUPPORT_EMAIL: "pavel@melioro.cz"
     },
     
     // === STORAGE KEYS ===
