@@ -243,6 +243,12 @@ class SettingsManager {
     
     // Vytvořit nastavení pro konkrétní model
     createModelSettings(modelDef) {
+    // Zobrazit nastavení pouze pro aktuálně vybraný model
+          const selectedModel = window.modelManager?.getActiveModel()?.id;
+          if (modelDef.id !== selectedModel) {
+          return null;
+          }
+        
         // Speciální nastavení pro OpenAI modely s podporou Assistant
         if (modelDef.provider === 'openai' && modelDef.config?.assistant === true) {
             const group = document.createElement('div');
