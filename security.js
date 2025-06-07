@@ -361,9 +361,12 @@ class SecurityManager {
            const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
            
            // Rozdělit salt, IV a data
-           const salt = combined.slice(0, 16);
-           const iv = combined.slice(16, 28);
-           const encrypted = combined.slice(28);
+          // const salt = combined.slice(0, 16);
+          // const iv = combined.slice(16, 28);
+          // const encrypted = combined.slice(28);
+           const salt = new Uint8Array(combined.buffer, combined.byteOffset, 16);
+           const iv = new Uint8Array(combined.buffer, combined.byteOffset + 16, 12);
+           const encrypted = new Uint8Array(combined.buffer, combined.byteOffset + 28, combined.length - 28);
            
            // Odvodit klíč z hesla
            const passwordKey = await this.deriveKeyFromPassword(password, salt);
