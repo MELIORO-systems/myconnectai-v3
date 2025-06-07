@@ -404,42 +404,50 @@ async importSecureData(encryptedData, password) {
     }
 }
    
-   // Odvodit klíč z hesla
-   async deriveKeyFromPassword(password, salt = null) {
-       const encoder = new TextEncoder();
-       const passwordBuffer = encoder.encode(password);
-       
-       // Použít poskytnutý salt nebo vygenerovat nový
-       const saltBuffer = salt || crypto.getRandomValues(new Uint8Array(16));
-       
-       // Import hesla jako klíč
-       const passwordKey = await crypto.subtle.importKey(
-           'raw',
-           passwordBuffer,
-           'PBKDF2',
-           false,
-           ['deriveKey']
-       );
-       
-       // Odvodit AES klíč
-       const key = await crypto.subtle.deriveKey(
-           {
-               name: 'PBKDF2',
-               salt: saltBuffer,
-               iterations: 100000,
-               hash: 'SHA-256'
-           },
-           passwordKey,
-           {
-               name: 'AES-GCM',
-               length: 256
-           },
-           true,
-           ['encrypt', 'decrypt']
-       );
-       
-       return { key, salt: saltBuffer };
-   }
+// Odvodit klíč z hesla
+async deriveKeyFromPassword(password, salt = null) {
+    console.log('deriveKeyFromPassword called with:');
+    console.log('- password length:', password.length);
+    console.log('- salt provided:', salt ? 'YES' : 'NO');
+    
+    const encoder = new TextEncoder();
+    const passwordBuffer = encoder.encode(password);
+    
+    // Použít poskytnutý salt nebo vygenerovat nový
+    const saltBuffer = salt || crypto.getRandomValues(new Uint8Array(16));
+    console.log('- using salt length:', saltBuffer.length);
+    console.log('- salt first 4 bytes:', Array.from(saltBuffer.slice(0, 4)));
+    
+    // Import hesla jako klíč
+    const passwordKey = await crypto.subtle.importKey(
+        'raw',
+        passwordBuffer,
+        'PBKDF2',
+        false,
+        ['deriveKey']
+    );
+    
+    // Odvodit AES klíč
+    const key = await crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: saltBuffer,
+            iterations: 100000,
+            hash: 'SHA-256'
+        },
+        passwordKey,
+        {
+            name: 'AES-GCM',
+            length: 256
+        },
+        true,
+        ['encrypt', 'decrypt']
+    );
+    
+    console.log('- key derived successfully');
+    
+    return { key, salt: saltBuffer };
+}
    
    // Validace síly hesla
    validatePassword(password) {
