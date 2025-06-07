@@ -436,7 +436,16 @@ class SettingsManager {
         this.addEventListener(select, 'change', () => {
         this.selectedModel = select.value;
         this.markAsChanged();
-    
+
+         // Vyčistit existující provider sekce
+        const providersContainer = document.getElementById('providers-settings');
+        if (providersContainer) {
+            // Odstranit všechny child elementy
+            while (providersContainer.firstChild) {
+                providersContainer.removeChild(providersContainer.firstChild);
+            }
+        }
+            
         // Znovu načíst hierarchická nastavení pro nový model
         this.loadHierarchicalSettings();
         });
