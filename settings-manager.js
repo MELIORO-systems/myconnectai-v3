@@ -434,8 +434,11 @@ class SettingsManager {
 
         // Event listener
         this.addEventListener(select, 'change', () => {
-            this.selectedModel = select.value;
-            this.markAsChanged();
+        this.selectedModel = select.value;
+        this.markAsChanged();
+    
+        // Znovu načíst hierarchická nastavení pro nový model
+        this.loadHierarchicalSettings();
         });
     }
 
