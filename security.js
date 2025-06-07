@@ -318,7 +318,8 @@ class SecurityManager {
        
        try {
            // Vytvořit dočasný klíč z hesla
-           const passwordKey = await this.deriveKeyFromPassword(password);
+           const salt = crypto.getRandomValues(new Uint8Array(16));
+           const passwordKey = await this.deriveKeyFromPassword(password, salt);
            
            // Zašifrovat data pomocí password-based klíče
            const jsonData = JSON.stringify(secureData);
@@ -329,7 +330,7 @@ class SecurityManager {
            const iv = crypto.getRandomValues(new Uint8Array(12));
            
            // Salt pro odvození klíče
-           const salt = crypto.getRandomValues(new Uint8Array(16));
+           // const salt = crypto.getRandomValues(new Uint8Array(16));
            
            // Šifrovat
            const encrypted = await crypto.subtle.encrypt(
