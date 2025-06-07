@@ -354,49 +354,55 @@ class SecurityManager {
        }
    }
    
-   // Import zabezpečených dat
-   async importSecureData(encryptedData, password) {
-       try {
-           // Dekódovat
-           const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
-           
-           // Rozdělit salt, IV a data
-          // const salt = combined.slice(0, 16);
-          // const iv = combined.slice(16, 28);
-          // const encrypted = combined.slice(28);
-           const salt = new Uint8Array(combined.buffer, combined.byteOffset, 16);
-           const iv = new Uint8Array(combined.buffer, combined.byteOffset + 16, 12);
-           const encrypted = new Uint8Array(combined.buffer, combined.byteOffset + 28, combined.length - 28);
-           
-           // Odvodit klíč z hesla
-           const passwordKey = await this.deriveKeyFromPassword(password, salt);
-           
-           // Dešifrovat
-           const decrypted = await crypto.subtle.decrypt(
-               {
-                   name: 'AES-GCM',
-                   iv: iv
-               },
-               passwordKey.key,
-               encrypted
-           );
-           
-           // Parsovat JSON
-           const decoder = new TextDecoder();
-           const jsonData = decoder.decode(decrypted);
-           const data = JSON.parse(jsonData);
-           
-           // Uložit všechna data
-           for (const [key, value] of Object.entries(data)) {
-               await this.saveSecure(key, value);
-           }
-           
-           return true;
-       } catch (error) {
-           console.error('Import error:', error);
-           return false;
-       }
-   }
+// Import zabezpečených dat
+async importSecureData(encryptedData, password) {
+    try {
+        // Dekódovat
+        const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+        
+        // Rozdělit salt, IV a data
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 28);
+        const encrypted = combined.slice(28);
+        
+        console.log('Import debug:');
+        console.log('Salt length:', salt.length);
+        console.log('IV length:', iv.length);
+        console.log('Encrypted length:', encrypted.length);
+        console.log('Password length:', password.length);
+        
+        // Odvodit klíč z hesla
+        const passwordKey = await this.deriveKeyFromPassword(password, salt);
+        console.log('Key derived successfully');
+        
+        // Dešifrovat
+        const decrypted = await crypto.subtle.decrypt(
+            {
+                name: 'AES-GCM',
+                iv: iv
+            },
+            passwordKey.key,
+            encrypted
+        );
+        console.log('Decryption successful!');
+        
+        // Parsovat JSON
+        const decoder = new TextDecoder();
+        const jsonData = decoder.decode(decrypted);
+        const data = JSON.parse(jsonData);
+        
+        // Uložit všechna data
+        for (const [key, value] of Object.entries(data)) {
+            await this.saveSecure(key, value);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Import error:', error);
+        console.error('Error stack:', error.stack);
+        return false;
+    }
+}
    
    // Odvodit klíč z hesla
    async deriveKeyFromPassword(password, salt = null) {
