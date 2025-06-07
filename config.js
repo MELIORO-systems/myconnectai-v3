@@ -107,7 +107,7 @@ const CONFIG = {
     // === SYSTEM INFO ===
     SYSTEM: {
         NAME: "MyConnectAI v3",
-        DESCRIPTION: "Multi-Model AI Chat aplikace s podporou různých jazykových modelů",
+        DESCRIPTION: "MyConnectAI je pokročilá webová aplikace, která sjednocuje přístup k nejmodernějším AI modelům v jediném intuitivním rozhraní. Komunikujte s GPT-4, Claude, Gemini a dalšími AI asistenty bez nutnosti přepínat mezi platformami. Vaše API klíče jsou bezpečně šifrovány přímo ve vašem prohlížeči - žádná data neopouštějí vaše zařízení. Ideální nástroj pro vývojáře, výzkumníky i kreativce, kteří potřebují flexibilní přístup k různým AI modelům.",
         VERSION: "3.2.0",
         BUILD_DATE: "2024-12-06",
         AUTHOR: "MELIORO Systems",
